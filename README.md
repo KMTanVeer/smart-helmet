@@ -121,7 +121,7 @@ Common GND for all components!
 
 2. **Configure Emergency Contact**:
    ```cpp
-   const char PHONE_NUMBER[] = "+8801747213525";  // Change this!
+   const char PHONE_NUMBER[] = "+1234567890";  // Change this!
    ```
 
 3. **Adjust Detection Thresholds** (optional):

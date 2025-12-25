@@ -72,7 +72,7 @@
  * 
  * Author: Smart Helmet Project
  * Version: 1.0
- * Last Updated: December 2025
+ * Date: 2024
  */
 
 #include <Wire.h>
@@ -93,7 +93,7 @@ HardwareSerial gpsSerial(2);  // Use UART2 for GPS communication
 HardwareSerial sim800(1);  // Use UART1 for SIM800L communication
 #define SIM_RX 26  // ESP32 RX pin connected to SIM800L TX
 #define SIM_TX 27  // ESP32 TX pin connected to SIM800L RX
-const char PHONE_NUMBER[] = "+8801747213525";   // ⚠️ CHANGE TO YOUR EMERGENCY CONTACT
+const char PHONE_NUMBER[] = "+1234567890";   // ⚠️ CHANGE TO YOUR EMERGENCY CONTACT
 
 /* ================= BUZZER & BUTTON ================= */
 #define BUZZER_PIN 25   // Active buzzer for alert
