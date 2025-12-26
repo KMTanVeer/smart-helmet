@@ -77,6 +77,14 @@
 
 #include <Wire.h>
 #include <TinyGPSPlus.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+/* ================= OLED DISPLAY ================= */
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 /* ================= MPU6050 ================= */
 #define MPU_ADDR 0x68  // I2C address of MPU6050
@@ -334,9 +342,16 @@ void loop() {
   if (digitalRead(CANCEL_BTN) == LOW) {
     crashDetected = false;
     smsSent = false;
+    showingSMSMessage = false;
     digitalWrite(BUZZER_PIN, LOW);
     Serial.println("❌ ALERT CANCELLED BY USER");
     delay(1000);  // Debounce delay
+  }
+  
+  // Check if SMS message should be cleared after 2 seconds
+  if (showingSMSMessage && (millis() - smsDisplayTime >= 2000)) {
+    showingSMSMessage = false;
+    updateOLEDDisplay();
   }
 
   // ===== READ SENSOR DATA =====
@@ -395,6 +410,9 @@ void loop() {
   while (gpsSerial.available()) {
     gps.encode(gpsSerial.read());
   }
+  
+  // Update GPS connection status
+  gpsConnected = gps.location.isValid();
 
   // ===== EMERGENCY SMS TRANSMISSION =====
   // Only send SMS once when:
@@ -427,6 +445,38 @@ void loop() {
     Serial.print(gps.location.lng(), 6);
     Serial.print(" | Sats: ");
     Serial.println(gps.satellites.value());
+  }
+  
+  // Query signal strength periodically (every 5 seconds)
+  static unsigned long lastSignalQuery = 0;
+  static bool firstUpdate = true; // Track if we need initial update
+  if (millis() - lastSignalQuery >= 5000) {
+    signalStrength = querySignalStrength();
+    lastSignalQuery = millis();
+  }
+  
+  // TODO: Update batteryPercent from battery sensor reading here
+  // Example hardware setup: Connect battery through voltage divider to ADC pin (e.g., GPIO34)
+  // Voltage divider: R1=100kΩ, R2=100kΩ to scale 4.2V (full) to 2.1V (within ESP32 3.3V limit)
+  // Example code:
+  //   #define BATTERY_PIN 34
+  //   float voltage = analogRead(BATTERY_PIN) * (3.3 / 4095.0) * 2.0; // Adjust multiplier for divider ratio
+  //   batteryPercent = map(voltage * 100, 330, 420, 0, 100); // Map 3.3V-4.2V to 0-100%
+  //   batteryPercent = constrain(batteryPercent, 0, 100);
+  
+  // Update display when state changes or on first loop iteration
+  bool stateChanged = (signalStrength != lastSignalStrength) ||
+                      (gpsConnected != lastGpsConnected) ||
+                      (batteryPercent != lastBatteryPercent) ||
+                      firstUpdate;
+  
+  if (!showingSMSMessage && stateChanged) {
+    updateOLEDDisplay();
+    // Update tracking variables only if they actually changed
+    if (signalStrength != lastSignalStrength) lastSignalStrength = signalStrength;
+    if (gpsConnected != lastGpsConnected) lastGpsConnected = gpsConnected;
+    if (batteryPercent != lastBatteryPercent) lastBatteryPercent = batteryPercent;
+    firstUpdate = false;
   }
 
   delay(200);  // Loop delay for sensor sampling rate (~5 Hz)
