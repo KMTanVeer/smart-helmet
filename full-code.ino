@@ -1,5 +1,13 @@
 #include <Wire.h>
 #include <TinyGPSPlus.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+/* ================= OLED DISPLAY ================= */
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 /* ================= MPU6050 ================= */
 #define MPU_ADDR 0x68
@@ -30,8 +38,134 @@ const char PHONE_NUMBER[] = "+8801747213525";   // CHANGE NUMBER
 bool crashDetected = false;
 bool smsSent = false;
 unsigned long impactStart = 0;
+unsigned long smsDisplayTime = 0;
+bool showingSMSMessage = false;
+
+/* ================= DISPLAY STATE ================= */
+int signalStrength = 0;
+bool gpsConnected = false;
+int batteryPercent = 100; // Default value, can be read from battery sensor if available
 
 /* ================= UTILITIES ================= */
+
+int querySignalStrength() {
+  sim800.println("AT+CSQ");
+  String response = "";
+  unsigned long start = millis();
+  while (millis() - start < 2000) {
+    while (sim800.available()) {
+      char c = sim800.read();
+      response += c;
+    }
+    if (response.indexOf("OK") != -1) break;
+  }
+  
+  // Parse response: +CSQ: <rssi>,<ber>
+  int csqIndex = response.indexOf("+CSQ:");
+  if (csqIndex != -1) {
+    int commaIndex = response.indexOf(',', csqIndex);
+    if (commaIndex != -1) {
+      String rssiStr = response.substring(csqIndex + 6, commaIndex);
+      rssiStr.trim();
+      int rssi = rssiStr.toInt();
+      if (rssi >= 0 && rssi <= 31) {
+        return rssi;
+      }
+    }
+  }
+  return 0; // No signal or error
+}
+
+void drawBatteryIcon(int x, int y, int percent) {
+  // Draw battery outline (20x10 pixels)
+  display.drawRect(x, y, 18, 10, SSD1306_WHITE);
+  display.fillRect(x + 18, y + 3, 2, 4, SSD1306_WHITE); // Battery tip
+  
+  // Fill battery based on percentage
+  int fillWidth = (percent * 14) / 100;
+  if (fillWidth > 0) {
+    display.fillRect(x + 2, y + 2, fillWidth, 6, SSD1306_WHITE);
+  }
+  
+  // Display percentage text
+  display.setCursor(x, y + 12);
+  display.setTextSize(1);
+  display.print(percent);
+  display.print("%");
+}
+
+void drawSignalBars(int x, int y, int strength) {
+  // Draw 4 signal bars based on strength
+  // Bar heights: 4, 6, 8, 10 pixels
+  int barHeights[4] = {4, 6, 8, 10};
+  int barWidth = 3;
+  int barSpacing = 2;
+  
+  int numBars = 0;
+  if (strength >= 21) {
+    numBars = 4; // Strong: all 4 bars
+  } else if (strength >= 11) {
+    numBars = 3; // Medium: 3 bars
+  } else if (strength > 0) {
+    numBars = 1; // Weak: 1 bar
+  }
+  
+  for (int i = 0; i < 4; i++) {
+    int barX = x + i * (barWidth + barSpacing);
+    int barY = y + (10 - barHeights[i]);
+    if (i < numBars) {
+      display.fillRect(barX, barY, barWidth, barHeights[i], SSD1306_WHITE);
+    } else {
+      display.drawRect(barX, barY, barWidth, barHeights[i], SSD1306_WHITE);
+    }
+  }
+  
+  // Display signal text
+  display.setCursor(x - 5, y + 12);
+  display.setTextSize(1);
+  if (strength >= 21) {
+    display.print("STRONG");
+  } else if (strength >= 11) {
+    display.print("MEDIUM");
+  } else if (strength > 0) {
+    display.print("WEAK");
+  } else {
+    display.print("NO SIG");
+  }
+}
+
+void updateOLEDDisplay() {
+  display.clearDisplay();
+  
+  if (showingSMSMessage) {
+    // Display SMS Sent message prominently
+    display.setTextSize(2);
+    display.setCursor(10, 20);
+    display.print("SMS SENT");
+    display.setTextSize(1);
+    display.setCursor(25, 45);
+    display.print("SUCCESS!");
+  } else {
+    // Regular status display
+    
+    // Battery (left side)
+    drawBatteryIcon(5, 5, batteryPercent);
+    
+    // Network signal (right side)
+    drawSignalBars(88, 5, signalStrength);
+    
+    // GPS status (bottom)
+    display.setCursor(10, 50);
+    display.setTextSize(1);
+    if (gpsConnected) {
+      display.print("GPS: Connected");
+    } else {
+      display.print("GPS: Connecting...");
+    }
+  }
+  
+  display.display();
+}
 
 String readSIMResponse(unsigned long timeout = 3000) {
   String response = "";
@@ -143,6 +277,21 @@ void setup() {
   pinMode(CANCEL_BTN, INPUT_PULLUP);
 
   Wire.begin(21,22);
+  
+  // Initialize OLED
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
+  display.clearDisplay();
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 20);
+  display.setTextSize(1);
+  display.println("Smart Helmet");
+  display.println("Initializing...");
+  display.display();
+  delay(2000);
+  
   Wire.beginTransmission(MPU_ADDR);
   Wire.write(0x6B);
   Wire.write(0);
@@ -154,6 +303,9 @@ void setup() {
   sim800.begin(9600, SERIAL_8N1, SIM_RX, SIM_TX);
 
   Serial.println("✅ SMART HELMET SYSTEM READY");
+  
+  // Initial display update
+  updateOLEDDisplay();
 }
 
 /* ================= LOOP ================= */
@@ -164,9 +316,17 @@ void loop() {
   if (digitalRead(CANCEL_BTN) == LOW) {
     crashDetected = false;
     smsSent = false;
+    showingSMSMessage = false;
     digitalWrite(BUZZER_PIN, LOW);
     Serial.println("❌ ALERT CANCELLED");
+    updateOLEDDisplay();
     delay(1000);
+  }
+  
+  // Check if SMS message should be cleared after 2 seconds
+  if (showingSMSMessage && (millis() - smsDisplayTime >= 2000)) {
+    showingSMSMessage = false;
+    updateOLEDDisplay();
   }
 
   readMPU();
@@ -199,15 +359,34 @@ void loop() {
   while (gpsSerial.available()) {
     gps.encode(gpsSerial.read());
   }
+  
+  // Update GPS connection status
+  gpsConnected = gps.location.isValid();
 
   if (crashDetected && gps.location.isValid() && !smsSent) {
     if (sendSMS(gps.location.lat(), gps.location.lng())) {
       smsSent = true;
+      // Show SMS sent message on OLED
+      showingSMSMessage = true;
+      smsDisplayTime = millis();
+      updateOLEDDisplay();
     }
   }
 
   if (crashDetected && !gps.location.isValid()) {
     Serial.println("✖ GPS NOT READY");
+  }
+  
+  // Query signal strength periodically (every 5 seconds)
+  static unsigned long lastSignalQuery = 0;
+  if (millis() - lastSignalQuery >= 5000) {
+    signalStrength = querySignalStrength();
+    lastSignalQuery = millis();
+  }
+  
+  // Update display if not showing SMS message
+  if (!showingSMSMessage) {
+    updateOLEDDisplay();
   }
 
   delay(200);
