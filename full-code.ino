@@ -64,10 +64,10 @@ int querySignalStrength() {
     while (sim800.available() && idx < 98) {
       response[idx++] = sim800.read();
     }
-    if (idx > 0) response[idx] = '\0'; // Null terminate after reading
+    if (idx > 0 && idx < 99) response[idx] = '\0'; // Safe null terminate
     if (strstr(response, "OK") != NULL) break;
   }
-  response[idx] = '\0'; // Ensure null termination
+  if (idx < 99) response[idx] = '\0'; // Final null termination within bounds
   
   // Parse response: +CSQ: <rssi>,<ber>
   char* csqPtr = strstr(response, "+CSQ:");
@@ -414,9 +414,10 @@ void loop() {
   
   if (!showingSMSMessage && stateChanged) {
     updateOLEDDisplay();
-    lastSignalStrength = signalStrength;
-    lastGpsConnected = gpsConnected;
-    lastBatteryPercent = batteryPercent;
+    // Update tracking variables only if they actually changed
+    if (signalStrength != lastSignalStrength) lastSignalStrength = signalStrength;
+    if (gpsConnected != lastGpsConnected) lastGpsConnected = gpsConnected;
+    if (batteryPercent != lastBatteryPercent) lastBatteryPercent = batteryPercent;
     firstUpdate = false;
   }
 
