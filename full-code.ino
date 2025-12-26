@@ -119,6 +119,17 @@ bool crashDetected = false;  // Flag: crash has been confirmed
 bool smsSent = false;        // Flag: emergency SMS has been sent
 unsigned long impactStart = 0;  // Timestamp when impact first detected
 
+/* ================= OLED DISPLAY STATE ================= */
+int signalStrength = 0;           // RSSI value (0-31) from SIM800L
+int lastSignalStrength = -1;      // Previous signal strength for change detection
+bool gpsConnected = false;         // GPS fix status
+bool lastGpsConnected = false;     // Previous GPS status for change detection
+int batteryPercent = 100;          // Battery level (default 100%)
+int lastBatteryPercent = -1;       // Previous battery level for change detection
+bool displayAvailable = false;     // Flag: OLED initialized successfully
+bool showingSMSMessage = false;    // Flag: SMS notification is being displayed
+unsigned long smsDisplayTime = 0;  // Timestamp when SMS message was shown
+
 /* ================= UTILITIES ================= */
 
 // Reads response from SIM800L with timeout
@@ -280,6 +291,136 @@ bool sendSMS(float lat, float lon) {
   return false;
 }
 
+/* ================= OLED DISPLAY FUNCTIONS ================= */
+
+// Queries signal strength from SIM800L using AT+CSQ command
+// Returns RSSI value (0-31), or 0 if query fails
+int querySignalStrength() {
+  sim800.println("AT+CSQ");
+  delay(100);
+  
+  char buffer[64] = {0};
+  unsigned long start = millis();
+  int idx = 0;
+  
+  // Read response with timeout
+  while (millis() - start < 2000 && idx < 63) {
+    if (sim800.available()) {
+      buffer[idx++] = sim800.read();
+    }
+  }
+  buffer[idx] = '\0';
+  
+  // Parse "+CSQ: <rssi>,<ber>" response
+  int rssi = 0;
+  const int CSQ_PREFIX_LENGTH = 6; // Length of "+CSQ: "
+  char* csqPos = strstr(buffer, "+CSQ:");
+  if (csqPos != NULL) {
+    sscanf(csqPos + CSQ_PREFIX_LENGTH, "%d", &rssi);
+    return rssi;
+  }
+  
+  return 0; // No signal or error
+}
+
+// Draws battery icon with fill level at specified position
+// Parameters: x, y = top-left position, percent = battery level (0-100)
+void drawBatteryIcon(int x, int y, int percent) {
+  // Draw battery outline (18x10 pixels)
+  display.drawRect(x, y, 18, 10, SSD1306_WHITE);
+  
+  // Draw battery tip (2x4 pixels)
+  display.fillRect(x + 18, y + 3, 2, 4, SSD1306_WHITE);
+  
+  // Calculate fill width based on percentage
+  int fillWidth = (percent * 14) / 100; // Max 14 pixels inside (18-2-2)
+  if (fillWidth > 0) {
+    display.fillRect(x + 2, y + 2, fillWidth, 6, SSD1306_WHITE);
+  }
+  
+  // Display percentage text below icon
+  display.setCursor(x, y + 12);
+  display.setTextSize(1);
+  display.print(percent);
+  display.print("%");
+}
+
+// Draws signal strength bars at specified position
+// Parameters: x, y = top-left position, strength = RSSI value (0-31)
+void drawSignalBars(int x, int y, int strength) {
+  // Determine number of bars based on signal strength
+  int numBars = 0;
+  const char* label = "NO SIG";
+  
+  if (strength >= 21) {
+    numBars = 4;
+    label = "STRONG";
+  } else if (strength >= 11) {
+    numBars = 3;
+    label = "MEDIUM";
+  } else if (strength > 0) {
+    numBars = 1;
+    label = "WEAK";
+  }
+  
+  // Draw 4 signal bars with varying heights
+  int barHeights[] = {4, 6, 8, 10};
+  for (int i = 0; i < 4; i++) {
+    int barX = x + (i * 5);
+    int barY = y + 10 - barHeights[i];
+    
+    if (i < numBars) {
+      // Filled bar for active signal
+      display.fillRect(barX, barY, 3, barHeights[i], SSD1306_WHITE);
+    } else {
+      // Outlined bar for inactive
+      display.drawRect(barX, barY, 3, barHeights[i], SSD1306_WHITE);
+    }
+  }
+  
+  // Display signal quality label below bars
+  display.setCursor(x, y + 12);
+  display.setTextSize(1);
+  display.print(label);
+}
+
+// Main display update function - refreshes OLED screen
+void updateOLEDDisplay() {
+  if (!displayAvailable) return;  // Skip if display not initialized
+  
+  display.clearDisplay();
+  
+  if (showingSMSMessage) {
+    // Display SMS sent notification
+    display.setTextSize(2);
+    display.setCursor(10, 20);
+    display.print("SMS SENT");
+    
+    display.setTextSize(1);
+    display.setCursor(30, 40);
+    display.print("SUCCESS!");
+  } else {
+    // Display regular status screen
+    
+    // Battery icon (top-left)
+    drawBatteryIcon(5, 5, batteryPercent);
+    
+    // Signal strength bars (top-right)
+    drawSignalBars(88, 5, signalStrength);
+    
+    // GPS connection status (bottom)
+    display.setTextSize(1);
+    display.setCursor(10, 50);
+    if (gpsConnected) {
+      display.print("GPS: Connected");
+    } else {
+      display.print("GPS: Connecting...");
+    }
+  }
+  
+  display.display();
+}
+
 /* ================= SETUP ================= */
 
 void setup() {
@@ -309,6 +450,23 @@ void setup() {
 
   // Calibrate gyroscope for accurate readings
   calibrateGyro();
+
+  // Initialize OLED Display
+  Serial.println("🔧 Initializing OLED Display...");
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println("⚠️  SSD1306 allocation failed - display disabled");
+    displayAvailable = false;
+  } else {
+    displayAvailable = true;
+    display.clearDisplay();
+    display.setTextColor(SSD1306_WHITE);
+    display.setTextSize(1);
+    display.setCursor(0, 0);
+    display.println("Smart Helmet");
+    display.println("Initializing...");
+    display.display();
+    Serial.println("✅ OLED Display initialized");
+  }
 
   // Initialize GPS module on UART2
   Serial.println("🔧 Initializing GPS...");
@@ -423,6 +581,9 @@ void loop() {
     Serial.println("📍 GPS fix acquired - sending emergency SMS...");
     if (sendSMS(gps.location.lat(), gps.location.lng())) {
       smsSent = true;
+      showingSMSMessage = true;
+      smsDisplayTime = millis();
+      updateOLEDDisplay();
       // Keep buzzer on until user cancels
     } else {
       Serial.println("⚠️  SMS failed - will retry...");
