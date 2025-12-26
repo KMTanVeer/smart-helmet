@@ -60,11 +60,11 @@ int querySignalStrength() {
   int idx = 0;
   unsigned long start = millis();
   
-  while (millis() - start < 2000 && idx < 99) {
-    while (sim800.available() && idx < 99) {
+  while (millis() - start < 2000 && idx < 98) { // Leave room for null terminator
+    while (sim800.available() && idx < 98) {
       response[idx++] = sim800.read();
     }
-    response[idx] = '\0'; // Null terminate after reading
+    if (idx > 0) response[idx] = '\0'; // Null terminate after reading
     if (strstr(response, "OK") != NULL) break;
   }
   response[idx] = '\0'; // Ensure null termination
@@ -398,7 +398,13 @@ void loop() {
   }
   
   // TODO: Update batteryPercent from battery sensor reading here
-  // Example: batteryPercent = readBatteryLevel();
+  // Example hardware setup: Connect battery through voltage divider to ADC pin (e.g., GPIO34)
+  // Voltage divider: R1=100kΩ, R2=100kΩ to scale 4.2V (full) to 2.1V (within ESP32 3.3V limit)
+  // Example code:
+  //   #define BATTERY_PIN 34
+  //   float voltage = analogRead(BATTERY_PIN) * (3.3 / 4095.0) * 2.0; // Adjust multiplier for divider ratio
+  //   batteryPercent = map(voltage * 100, 330, 420, 0, 100); // Map 3.3V-4.2V to 0-100%
+  //   batteryPercent = constrain(batteryPercent, 0, 100);
   
   // Update display when state changes or on first loop iteration
   bool stateChanged = (signalStrength != lastSignalStrength) ||
