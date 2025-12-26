@@ -43,31 +43,37 @@ bool showingSMSMessage = false;
 
 /* ================= DISPLAY STATE ================= */
 int signalStrength = 0;
+int lastSignalStrength = -1; // Track last displayed value
 bool gpsConnected = false;
+bool lastGpsConnected = false; // Track last displayed value
 int batteryPercent = 100; // Default value, can be read from battery sensor if available
+int lastBatteryPercent = -1; // Track last displayed value
+bool displayAvailable = false; // Track if OLED is initialized
 
 /* ================= UTILITIES ================= */
 
+#define CSQ_PREFIX_LENGTH 6  // Length of "+CSQ: " prefix
+
 int querySignalStrength() {
   sim800.println("AT+CSQ");
-  String response = "";
+  char response[100];
+  int idx = 0;
   unsigned long start = millis();
-  while (millis() - start < 2000) {
-    while (sim800.available()) {
-      char c = sim800.read();
-      response += c;
+  
+  while (millis() - start < 2000 && idx < 99) {
+    while (sim800.available() && idx < 99) {
+      response[idx++] = sim800.read();
     }
-    if (response.indexOf("OK") != -1) break;
+    response[idx] = '\0';
+    if (strstr(response, "OK") != NULL) break;
   }
   
   // Parse response: +CSQ: <rssi>,<ber>
-  int csqIndex = response.indexOf("+CSQ:");
-  if (csqIndex != -1) {
-    int commaIndex = response.indexOf(',', csqIndex);
-    if (commaIndex != -1) {
-      String rssiStr = response.substring(csqIndex + 6, commaIndex);
-      rssiStr.trim();
-      int rssi = rssiStr.toInt();
+  char* csqPtr = strstr(response, "+CSQ:");
+  if (csqPtr != NULL) {
+    int rssi = 0;
+    int ber = 0;
+    if (sscanf(csqPtr + CSQ_PREFIX_LENGTH, "%d,%d", &rssi, &ber) == 2) {
       if (rssi >= 0 && rssi <= 31) {
         return rssi;
       }
@@ -135,6 +141,8 @@ void drawSignalBars(int x, int y, int strength) {
 }
 
 void updateOLEDDisplay() {
+  if (!displayAvailable) return; // Skip if display not initialized
+  
   display.clearDisplay();
   
   if (showingSMSMessage) {
@@ -279,18 +287,21 @@ void setup() {
   Wire.begin(21,22);
   
   // Initialize OLED
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+  displayAvailable = display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  if(!displayAvailable) {
     Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
+    Serial.println(F("System continuing without display..."));
+    // System continues without OLED display
+  } else {
+    display.clearDisplay();
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 20);
+    display.setTextSize(1);
+    display.println("Smart Helmet");
+    display.println("Initializing...");
+    display.display();
+    delay(2000);
   }
-  display.clearDisplay();
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 20);
-  display.setTextSize(1);
-  display.println("Smart Helmet");
-  display.println("Initializing...");
-  display.display();
-  delay(2000);
   
   Wire.beginTransmission(MPU_ADDR);
   Wire.write(0x6B);
@@ -384,9 +395,16 @@ void loop() {
     lastSignalQuery = millis();
   }
   
-  // Update display if not showing SMS message
-  if (!showingSMSMessage) {
+  // Update display only when state changes or when not showing SMS message
+  bool stateChanged = (signalStrength != lastSignalStrength) ||
+                      (gpsConnected != lastGpsConnected) ||
+                      (batteryPercent != lastBatteryPercent);
+  
+  if (!showingSMSMessage && stateChanged) {
     updateOLEDDisplay();
+    lastSignalStrength = signalStrength;
+    lastGpsConnected = gpsConnected;
+    lastBatteryPercent = batteryPercent;
   }
 
   delay(200);
