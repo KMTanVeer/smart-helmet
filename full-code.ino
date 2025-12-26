@@ -64,9 +64,10 @@ int querySignalStrength() {
     while (sim800.available() && idx < 99) {
       response[idx++] = sim800.read();
     }
-    response[idx] = '\0';
+    response[idx] = '\0'; // Null terminate after reading
     if (strstr(response, "OK") != NULL) break;
   }
+  response[idx] = '\0'; // Ensure null termination
   
   // Parse response: +CSQ: <rssi>,<ber>
   char* csqPtr = strstr(response, "+CSQ:");
@@ -390,6 +391,7 @@ void loop() {
   
   // Query signal strength periodically (every 5 seconds)
   static unsigned long lastSignalQuery = 0;
+  static bool firstUpdate = true; // Track if we need initial update
   if (millis() - lastSignalQuery >= 5000) {
     signalStrength = querySignalStrength();
     lastSignalQuery = millis();
@@ -398,16 +400,18 @@ void loop() {
   // TODO: Update batteryPercent from battery sensor reading here
   // Example: batteryPercent = readBatteryLevel();
   
-  // Update display only when state changes or when not showing SMS message
+  // Update display when state changes or on first loop iteration
   bool stateChanged = (signalStrength != lastSignalStrength) ||
                       (gpsConnected != lastGpsConnected) ||
-                      (batteryPercent != lastBatteryPercent);
+                      (batteryPercent != lastBatteryPercent) ||
+                      firstUpdate;
   
   if (!showingSMSMessage && stateChanged) {
     updateOLEDDisplay();
     lastSignalStrength = signalStrength;
     lastGpsConnected = gpsConnected;
     lastBatteryPercent = batteryPercent;
+    firstUpdate = false;
   }
 
   delay(200);
