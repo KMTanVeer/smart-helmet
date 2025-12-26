@@ -46,7 +46,7 @@ int signalStrength = 0;
 int lastSignalStrength = -1; // Track last displayed value
 bool gpsConnected = false;
 bool lastGpsConnected = false; // Track last displayed value
-int batteryPercent = 100; // Default value, can be read from battery sensor if available
+int batteryPercent = 100; // Default value - TODO: Connect to battery sensor for real readings
 int lastBatteryPercent = -1; // Track last displayed value
 bool displayAvailable = false; // Track if OLED is initialized
 
@@ -394,6 +394,9 @@ void loop() {
     signalStrength = querySignalStrength();
     lastSignalQuery = millis();
   }
+  
+  // TODO: Update batteryPercent from battery sensor reading here
+  // Example: batteryPercent = readBatteryLevel();
   
   // Update display only when state changes or when not showing SMS message
   bool stateChanged = (signalStrength != lastSignalStrength) ||
