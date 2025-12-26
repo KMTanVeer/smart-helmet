@@ -326,16 +326,22 @@ int querySignalStrength() {
 // Draws battery icon with fill level at specified position
 // Parameters: x, y = top-left position, percent = battery level (0-100)
 void drawBatteryIcon(int x, int y, int percent) {
-  // Draw battery outline (18x10 pixels)
-  display.drawRect(x, y, 18, 10, SSD1306_WHITE);
+  const int BATTERY_WIDTH = 18;
+  const int BATTERY_HEIGHT = 10;
+  const int BATTERY_BORDER = 2;
+  
+  // Draw battery outline
+  display.drawRect(x, y, BATTERY_WIDTH, BATTERY_HEIGHT, SSD1306_WHITE);
   
   // Draw battery tip (2x4 pixels)
-  display.fillRect(x + 18, y + 3, 2, 4, SSD1306_WHITE);
+  display.fillRect(x + BATTERY_WIDTH, y + 3, 2, 4, SSD1306_WHITE);
   
   // Calculate fill width based on percentage
-  int fillWidth = (percent * 14) / 100; // Max 14 pixels inside (18-2-2)
+  // Inner area = BATTERY_WIDTH - (2 * BATTERY_BORDER)
+  int maxFillWidth = BATTERY_WIDTH - (2 * BATTERY_BORDER);
+  int fillWidth = (percent * maxFillWidth) / 100;
   if (fillWidth > 0) {
-    display.fillRect(x + 2, y + 2, fillWidth, 6, SSD1306_WHITE);
+    display.fillRect(x + BATTERY_BORDER, y + BATTERY_BORDER, fillWidth, BATTERY_HEIGHT - (2 * BATTERY_BORDER), SSD1306_WHITE);
   }
   
   // Display percentage text below icon
@@ -349,6 +355,8 @@ void drawBatteryIcon(int x, int y, int percent) {
 // Parameters: x, y = top-left position, strength = RSSI value (0-31)
 void drawSignalBars(int x, int y, int strength) {
   // Determine number of bars based on signal strength
+  // Signal mapping: 0-10=WEAK(1 bar), 11-20=MEDIUM(3 bars), 21-31=STRONG(4 bars)
+  // Note: Intentionally skips 2 bars to provide clearer visual distinction between levels
   int numBars = 0;
   const char* label = "NO SIG";
   
