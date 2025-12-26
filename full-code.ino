@@ -60,17 +60,22 @@ int querySignalStrength() {
   int idx = 0;
   unsigned long start = millis();
   
+  // Read response with timeout
   while (millis() - start < 2000 && idx < 98) { // Leave room for null terminator
     while (sim800.available() && idx < 98) {
       response[idx++] = sim800.read();
     }
-    if (idx > 0 && idx < 99) response[idx] = '\0'; // Safe null terminate
-    if (strstr(response, "OK") != NULL) break;
+    // Check if we have complete response
+    if (idx > 0) {
+      response[idx] = '\0';
+      if (strstr(response, "OK") != NULL) break;
+    }
   }
   if (idx < 99) response[idx] = '\0'; // Final null termination within bounds
   
   // Parse response: +CSQ: <rssi>,<ber>
-  char* csqPtr = strstr(response, "+CSQ:");
+  // Example: "+CSQ: 25,0"
+  char* csqPtr = strstr(response, "+CSQ: ");
   if (csqPtr != NULL) {
     int rssi = 0;
     int ber = 0;
