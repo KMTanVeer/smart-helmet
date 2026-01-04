@@ -489,7 +489,7 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
             // Highlight crash points in red
             accChart.data.datasets[0].pointBackgroundColor = crashMarkers.map(c => c ? '#ef4444' : '#3b82f6');
             accChart.data.datasets[0].pointRadius = crashMarkers.map(c => c ? 6 : 0);
-            accChart.data.datasets[0].borderColor = crashMarkers.map((c, i) => c ? '#ef4444' : '#3b82f6');
+            accChart.data.datasets[0].borderColor = crashMarkers.map(c => c ? '#ef4444' : '#3b82f6');
             
             accChart.update('none');
 
@@ -499,7 +499,7 @@ const char HTML_PAGE[] PROGMEM = R"rawliteral(
             
             gyroChart.data.datasets[0].pointBackgroundColor = crashMarkers.map(c => c ? '#ef4444' : '#8b5cf6');
             gyroChart.data.datasets[0].pointRadius = crashMarkers.map(c => c ? 6 : 0);
-            gyroChart.data.datasets[0].borderColor = crashMarkers.map((c, i) => c ? '#ef4444' : '#8b5cf6');
+            gyroChart.data.datasets[0].borderColor = crashMarkers.map(c => c ? '#ef4444' : '#8b5cf6');
             
             gyroChart.update('none');
         }
@@ -1008,7 +1008,22 @@ void handleClear() {
 /* ================= WEBSOCKET HANDLER ================= */
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
-  // Handle WebSocket events if needed
+  switch(type) {
+    case WStype_DISCONNECTED:
+      Serial.printf("[%u] WebSocket Disconnected!\n", num);
+      break;
+    case WStype_CONNECTED:
+      {
+        IPAddress ip = webSocket.remoteIP(num);
+        Serial.printf("[%u] WebSocket Connected from %d.%d.%d.%d\n", num, ip[0], ip[1], ip[2], ip[3]);
+      }
+      break;
+    case WStype_TEXT:
+      Serial.printf("[%u] Received text: %s\n", num, payload);
+      break;
+    default:
+      break;
+  }
 }
 
 void sendSensorDataViaWebSocket(float accMag, float gyroMag, bool isCrash) {
