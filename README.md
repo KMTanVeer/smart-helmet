@@ -2,6 +2,24 @@
 
 An intelligent motorcycle/bike helmet safety system that automatically detects accidents using motion sensors and sends emergency SMS alerts with GPS location to designated contacts.
 
+## 🎯 Not Sure Which Version to Use?
+
+👉 **[VERSION_SELECTION_GUIDE.md](VERSION_SELECTION_GUIDE.md)** - Complete decision guide to help you choose!
+
+## 🧪 NEW: MPU Testing Tool!
+
+**File: `mpu-test-web-dashboard.ino`** - 🧪 **Standalone Testing Tool** for:
+- 🔬 **Test MPU6050 crash detection logic** without full system
+- 📊 **Real-time web dashboard** with live graphs
+- 🔴 **Crashes marked in RED** with "Crash detected" notes
+- 💾 **Download data as CSV** to phone/computer
+- ⚙️ **Adjustable thresholds** to fine-tune crash detection
+- 📱 **Mobile-friendly** interface
+- **NO GPS, NO SMS, NO BUZZER** - Pure testing mode!
+
+👉 See **[MPU_TEST_README.md](MPU_TEST_README.md)** for complete testing guide!  
+👉 See **[QUICK_START_MPU_TEST.md](QUICK_START_MPU_TEST.md)** for 5-minute setup!
+
 ## 🌟 Latest Version - Web Dashboard!
 
 **New File: `smart-helmet-web-dashboard.ino`** - 🔥 **Most Advanced Version** with:
@@ -339,9 +357,11 @@ ACC(g): 3.45 | GYRO(dps): 156.7 [IMPACT DETECTED]
 - **`smart-helmet-web-dashboard.ino`** - 🔥 **LATEST** Real-time web dashboard version (v3.0) - **RECOMMENDED**
 - **`smart-helmet-enhanced.ino`** - ✨ Enhanced version with passive buzzer, 3 contacts, battery monitoring, and crash logging (v2.0)
 - **`full-code.ino`** - Original working implementation (v1.0)
+- **`mpu-test-web-dashboard.ino`** - 🧪 **TESTING TOOL** MPU crash detection testing with web interface - **FOR TESTING ONLY**
 
 ### Documentation
 - **`README.md`** - This documentation (overview)
+- **`MPU_TEST_README.md`** - 🧪 Complete guide for MPU testing tool
 - **`WEB_DASHBOARD_README.md`** - 🌐 Complete guide for web dashboard version
 - **`LIBRARY_INSTALLATION.md`** - Library installation guide for web dashboard
 - **`ENHANCED_VERSION_README.md`** - Complete guide for enhanced version
@@ -356,6 +376,7 @@ ACC(g): 3.45 | GYRO(dps): 156.7 [IMPACT DETECTED]
 - **`visualize_crashes.py`** - Python script to generate graphs from crash data
 
 ### Test/Example Files
+- **`mpu-test-web-dashboard.ino`** - 🧪 **MPU Testing Tool** - Web dashboard for crash detection testing
 - `crash.ino` - Simple crash detection test
 - `gyro-accelerometer.ino` - MPU6050 sensor testing
 - `sim800L.ino` - SIM800L SMS testing
@@ -363,24 +384,26 @@ ACC(g): 3.45 | GYRO(dps): 156.7 [IMPACT DETECTED]
 
 ## 🔄 Version Comparison
 
-| Feature | v1.0 (full-code) | v2.0 (enhanced) | v3.0 (web-dashboard) ⭐ |
-|---------|------------------|-----------------|-------------------------|
-| Crash Detection | ✅ | ✅ | ✅ |
-| GPS Tracking | ✅ | ✅ | ✅ |
-| SMS Alerts | ✅ (1 contact) | ✅ (3 contacts) | ✅ (3 contacts) |
-| Buzzer | Active | Passive w/ tones | Passive w/ tones |
-| Battery Monitor | ❌ | ✅ | ✅ |
-| Crash Logging | ❌ | ✅ CSV | ✅ CSV |
-| OLED Display | ✅ | ✅ | ✅ Enhanced |
-| Web Dashboard | ❌ | ❌ | ✅ Real-time |
-| Live Graphs | ❌ | ❌ | ✅ Yes |
-| Crash Notes | ❌ | ❌ | ✅ Yes |
-| Remote Config | ❌ | ❌ | ✅ Yes |
-| Mobile Access | ❌ | ❌ | ✅ Yes |
-| Data Download | ❌ | Manual | ✅ One-click |
-| **Recommended For** | Learning | Daily Use | Production |
+| Feature | v1.0 (full-code) | v2.0 (enhanced) | v3.0 (web-dashboard) ⭐ | MPU Test Tool 🧪 |
+|---------|------------------|-----------------|-------------------------|------------------|
+| Crash Detection | ✅ | ✅ | ✅ | ✅ |
+| GPS Tracking | ✅ | ✅ | ✅ | ❌ |
+| SMS Alerts | ✅ (1 contact) | ✅ (3 contacts) | ✅ (3 contacts) | ❌ |
+| Buzzer | Active | Passive w/ tones | Passive w/ tones | ❌ |
+| Battery Monitor | ❌ | ✅ | ✅ | ❌ |
+| Crash Logging | ❌ | ✅ CSV | ✅ CSV | ✅ CSV |
+| OLED Display | ✅ | ✅ | ✅ Enhanced | ❌ |
+| Web Dashboard | ❌ | ❌ | ✅ Real-time | ✅ Real-time |
+| Live Graphs | ❌ | ❌ | ✅ Yes | ✅ Yes |
+| Crash Notes | ❌ | ❌ | ✅ Yes | ❌ |
+| Remote Config | ❌ | ❌ | ✅ Yes | ✅ Yes |
+| Mobile Access | ❌ | ❌ | ✅ Yes | ✅ Yes |
+| Data Download | ❌ | Manual | ✅ One-click | ✅ One-click |
+| **Recommended For** | Learning | Daily Use | Production | **Testing** |
 
 **New to Smart Helmet?** Start with `smart-helmet-web-dashboard.ino` (v3.0) - it has all features!
+
+**Want to test crash detection first?** Use `mpu-test-web-dashboard.ino` - minimal setup, pure testing!
 
 ## 🤝 Contributing
 
