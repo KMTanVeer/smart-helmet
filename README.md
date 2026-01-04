@@ -2,9 +2,24 @@
 
 An intelligent motorcycle/bike helmet safety system that automatically detects accidents using motion sensors and sends emergency SMS alerts with GPS location to designated contacts.
 
-## 🆕 Enhanced Version Available!
+## 🌟 Latest Version - Web Dashboard!
 
-**New File: `smart-helmet-enhanced.ino`** - Enhanced version with:
+**New File: `smart-helmet-web-dashboard.ino`** - 🔥 **Most Advanced Version** with:
+- 🌐 **Real-Time Web Dashboard** - Monitor from mobile/laptop browser
+- 📊 **Live Graphs** - Real-time acceleration & gyroscope visualization
+- 🔴 **Crash Highlighting** - Crash events shown in RED on graphs
+- 📝 **Crash Notes** - Add notes/comments to crash events
+- 💾 **CSV Download** - Export complete crash history
+- ⚙️ **Configurable Thresholds** - Adjust sensitivity via web interface
+- 📱 **Mobile-Friendly** - Responsive design for any device
+- ⚡ **WebSocket Streaming** - Instant real-time updates (5 Hz)
+
+👉 See **[WEB_DASHBOARD_README.md](WEB_DASHBOARD_README.md)** for complete guide!
+👉 See **[LIBRARY_INSTALLATION.md](LIBRARY_INSTALLATION.md)** for library setup!
+
+## 🆕 Enhanced Version Also Available!
+
+**File: `smart-helmet-enhanced.ino`** - Enhanced version with:
 - ✨ **Passive Buzzer** with distinct sound patterns (power-on, warning, beep)
 - 📱 **3 Emergency Contacts** instead of 1
 - 🔋 **Working Battery Monitoring** with real-time percentage display
@@ -321,13 +336,18 @@ ACC(g): 3.45 | GYRO(dps): 156.7 [IMPACT DETECTED]
 ## 📄 Project Files
 
 ### Main Implementation Files
-- **`full-code.ino`** - Original working implementation (v1.0)
+- **`smart-helmet-web-dashboard.ino`** - 🔥 **LATEST** Real-time web dashboard version (v3.0) - **RECOMMENDED**
 - **`smart-helmet-enhanced.ino`** - ✨ Enhanced version with passive buzzer, 3 contacts, battery monitoring, and crash logging (v2.0)
+- **`full-code.ino`** - Original working implementation (v1.0)
 
 ### Documentation
 - **`README.md`** - This documentation (overview)
+- **`WEB_DASHBOARD_README.md`** - 🌐 Complete guide for web dashboard version
+- **`LIBRARY_INSTALLATION.md`** - Library installation guide for web dashboard
 - **`ENHANCED_VERSION_README.md`** - Complete guide for enhanced version
+- **`CRASH_DATA_GUIDE.md`** - Crash data and graph generation guide
 - **`SOUND_PATTERNS_GUIDE.md`** - Passive buzzer sound patterns reference
+- **`VERSION_COMPARISON.md`** - Feature comparison between versions
 - **`IMPLEMENTATION_SUMMARY.md`** - OLED implementation details
 - **`OLED_IMPLEMENTATION.md`** - OLED display technical guide
 - **`OLED_VISUAL_REFERENCE.md`** - OLED display visual examples
@@ -340,6 +360,27 @@ ACC(g): 3.45 | GYRO(dps): 156.7 [IMPACT DETECTED]
 - `gyro-accelerometer.ino` - MPU6050 sensor testing
 - `sim800L.ino` - SIM800L SMS testing
 - `gps-sim-both-integrated.ino` - GPS + SIM800L integration test
+
+## 🔄 Version Comparison
+
+| Feature | v1.0 (full-code) | v2.0 (enhanced) | v3.0 (web-dashboard) ⭐ |
+|---------|------------------|-----------------|-------------------------|
+| Crash Detection | ✅ | ✅ | ✅ |
+| GPS Tracking | ✅ | ✅ | ✅ |
+| SMS Alerts | ✅ (1 contact) | ✅ (3 contacts) | ✅ (3 contacts) |
+| Buzzer | Active | Passive w/ tones | Passive w/ tones |
+| Battery Monitor | ❌ | ✅ | ✅ |
+| Crash Logging | ❌ | ✅ CSV | ✅ CSV |
+| OLED Display | ✅ | ✅ | ✅ Enhanced |
+| Web Dashboard | ❌ | ❌ | ✅ Real-time |
+| Live Graphs | ❌ | ❌ | ✅ Yes |
+| Crash Notes | ❌ | ❌ | ✅ Yes |
+| Remote Config | ❌ | ❌ | ✅ Yes |
+| Mobile Access | ❌ | ❌ | ✅ Yes |
+| Data Download | ❌ | Manual | ✅ One-click |
+| **Recommended For** | Learning | Daily Use | Production |
+
+**New to Smart Helmet?** Start with `smart-helmet-web-dashboard.ino` (v3.0) - it has all features!
 
 ## 🤝 Contributing
 
