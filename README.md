@@ -2,8 +2,20 @@
 
 An intelligent motorcycle/bike helmet safety system that automatically detects accidents using motion sensors and sends emergency SMS alerts with GPS location to designated contacts.
 
+## 🆕 Enhanced Version Available!
+
+**New File: `smart-helmet-enhanced.ino`** - Enhanced version with:
+- ✨ **Passive Buzzer** with distinct sound patterns (power-on, warning, beep)
+- 📱 **3 Emergency Contacts** instead of 1
+- 🔋 **Working Battery Monitoring** with real-time percentage display
+- 💾 **Crash Data Logging** to SPIFFS with CSV export
+- 📊 **Graph Generation** support with Python visualization tools
+
+👉 See **[ENHANCED_VERSION_README.md](ENHANCED_VERSION_README.md)** for full details!
+
 ## 🎯 Features
 
+### Original Version (full-code.ino)
 - **Automatic Accident Detection**: Uses MPU6050 6-axis gyroscope and accelerometer to detect crashes
 - **GPS Location Tracking**: Ublox Neo-8M GPS module provides accurate location coordinates
 - **Emergency SMS Alerts**: SIM800L GSM module sends SMS with Google Maps link to emergency contacts
@@ -11,6 +23,7 @@ An intelligent motorcycle/bike helmet safety system that automatically detects a
 - **False Alarm Prevention**: Manual button to cancel false positives
 - **Professional SIM800L Handling**: Robust error checking and network status monitoring
 - **Modular Code Design**: Well-organized, documented, and easy to customize
+- **OLED Display**: Real-time status display with battery, GPS, and signal strength
 
 ## 🔧 Hardware Requirements
 
@@ -307,22 +320,41 @@ ACC(g): 3.45 | GYRO(dps): 156.7 [IMPACT DETECTED]
 
 ## 📄 Project Files
 
-- `full-code.ino` - Main complete system implementation
+### Main Implementation Files
+- **`full-code.ino`** - Original working implementation (v1.0)
+- **`smart-helmet-enhanced.ino`** - ✨ Enhanced version with passive buzzer, 3 contacts, battery monitoring, and crash logging (v2.0)
+
+### Documentation
+- **`README.md`** - This documentation (overview)
+- **`ENHANCED_VERSION_README.md`** - Complete guide for enhanced version
+- **`SOUND_PATTERNS_GUIDE.md`** - Passive buzzer sound patterns reference
+- **`IMPLEMENTATION_SUMMARY.md`** - OLED implementation details
+- **`OLED_IMPLEMENTATION.md`** - OLED display technical guide
+- **`OLED_VISUAL_REFERENCE.md`** - OLED display visual examples
+
+### Utility Scripts
+- **`visualize_crashes.py`** - Python script to generate graphs from crash data
+
+### Test/Example Files
 - `crash.ino` - Simple crash detection test
 - `gyro-accelerometer.ino` - MPU6050 sensor testing
 - `sim800L.ino` - SIM800L SMS testing
 - `gps-sim-both-integrated.ino` - GPS + SIM800L integration test
-- `README.md` - This documentation file
 
 ## 🤝 Contributing
 
-Contributions are welcome! Areas for improvement:
-- Battery monitoring and low power modes
-- Multiple contact support
+Contributions are welcome! The enhanced version already includes:
+- ✅ Battery monitoring
+- ✅ Multiple contact support (3 contacts)
+- ✅ Data logging with graphs
+- ✅ Advanced sound alerts
+
+Future areas for improvement:
 - Voice call integration
-- SD card logging
-- Web dashboard for location history
+- Cloud/web dashboard for location history
+- Mobile app integration
 - Machine learning for better crash detection
+- Low power modes and sleep optimization
 
 ## 📝 License
 
