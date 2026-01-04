@@ -2,6 +2,10 @@
 
 An intelligent motorcycle/bike helmet safety system that automatically detects accidents using motion sensors and sends emergency SMS alerts with GPS location to designated contacts.
 
+## 🎯 Not Sure Which Version to Use?
+
+👉 **[VERSION_SELECTION_GUIDE.md](VERSION_SELECTION_GUIDE.md)** - Complete decision guide to help you choose!
+
 ## 🧪 NEW: MPU Testing Tool!
 
 **File: `mpu-test-web-dashboard.ino`** - 🧪 **Standalone Testing Tool** for:
@@ -13,7 +17,8 @@ An intelligent motorcycle/bike helmet safety system that automatically detects a
 - 📱 **Mobile-friendly** interface
 - **NO GPS, NO SMS, NO BUZZER** - Pure testing mode!
 
-👉 See **[MPU_TEST_README.md](MPU_TEST_README.md)** for complete testing guide!
+👉 See **[MPU_TEST_README.md](MPU_TEST_README.md)** for complete testing guide!  
+👉 See **[QUICK_START_MPU_TEST.md](QUICK_START_MPU_TEST.md)** for 5-minute setup!
 
 ## 🌟 Latest Version - Web Dashboard!
 
