@@ -1400,22 +1400,24 @@ void setup() {
     Serial.println("System will continue with local features only");
   }
   
-  // Setup web server routes
-  server.on("/", handleRoot);
-  server.on("/updateThresholds", HTTP_POST, handleUpdateThresholds);
-  server.on("/getSettings", handleGetSettings);
-  server.on("/getCrashHistory", handleGetCrashHistory);
-  server.on("/downloadCSV", handleDownloadCSV);
-  server.on("/downloadCrashCSV", handleDownloadCrashCSV);
-  
-  // Start web server
-  server.begin();
-  Serial.println("✅ Web server started on port 80");
-  
-  // Start WebSocket server
-  webSocket.begin();
-  webSocket.onEvent(webSocketEvent);
-  Serial.println("✅ WebSocket server started on port 81");
+  // Setup web server routes (only if WiFi connected)
+  if (WiFi.status() == WL_CONNECTED) {
+    server.on("/", handleRoot);
+    server.on("/updateThresholds", HTTP_POST, handleUpdateThresholds);
+    server.on("/getSettings", handleGetSettings);
+    server.on("/getCrashHistory", handleGetCrashHistory);
+    server.on("/downloadCSV", handleDownloadCSV);
+    server.on("/downloadCrashCSV", handleDownloadCrashCSV);
+    
+    // Start web server
+    server.begin();
+    Serial.println("✅ Web server started on port 80");
+    
+    // Start WebSocket server
+    webSocket.begin();
+    webSocket.onEvent(webSocketEvent);
+    Serial.println("✅ WebSocket server started on port 81");
+  }
 
   // Initialize OLED Display
   Serial.println("🔧 Initializing OLED Display...");
@@ -1465,9 +1467,48 @@ void setup() {
 
 void loop() {
   
+  // ===== WIFI RECONNECTION CHECK =====
+  // Check WiFi connection every 30 seconds and attempt to reconnect if disconnected
+  static unsigned long lastWiFiCheck = 0;
+  static bool wifiWasConnected = true;
+  
+  if (millis() - lastWiFiCheck >= 30000) {  // Check every 30 seconds
+    if (WiFi.status() != WL_CONNECTED) {
+      if (wifiWasConnected) {
+        Serial.println("⚠️ WiFi connection lost! Attempting to reconnect...");
+        wifiWasConnected = false;
+      }
+      WiFi.disconnect();
+      delay(100);
+      WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+      
+      int attempts = 0;
+      while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+        delay(500);
+        Serial.print(".");
+        attempts++;
+      }
+      
+      if (WiFi.status() == WL_CONNECTED) {
+        Serial.println("\n✅ WiFi reconnected!");
+        Serial.print("📱 IP Address: ");
+        Serial.println(WiFi.localIP());
+        wifiWasConnected = true;
+      } else {
+        Serial.println("\n❌ WiFi reconnection failed - will retry later");
+      }
+    } else {
+      wifiWasConnected = true;
+    }
+    lastWiFiCheck = millis();
+  }
+  
   // ===== HANDLE WEB SERVER & WEBSOCKET =====
-  server.handleClient();
-  webSocket.loop();
+  // Only handle if WiFi is connected
+  if (WiFi.status() == WL_CONNECTED) {
+    server.handleClient();
+    webSocket.loop();
+  }
 
   // ===== CANCEL BUTTON CHECK =====
   if (digitalRead(CANCEL_BTN) == LOW) {
@@ -1532,20 +1573,22 @@ void loop() {
         crashTime = millis();
         totalCrashCount++;
         
-        // Send crash event via WebSocket
-        StaticJsonDocument<200> crashDoc;
-        crashDoc["type"] = "crash";
-        crashDoc["count"] = totalCrashCount;
-        crashDoc["acc"] = accMag;
-        crashDoc["gyro"] = gyroMag;
-        
-        char dateTime[32];
-        getCurrentDateTime(dateTime, sizeof(dateTime));
-        crashDoc["dateTime"] = String(dateTime);
-        
-        String crashJson;
-        serializeJson(crashDoc, crashJson);
-        webSocket.broadcastTXT(crashJson);
+        // Send crash event via WebSocket (only if WiFi connected)
+        if (WiFi.status() == WL_CONNECTED) {
+          StaticJsonDocument<200> crashDoc;
+          crashDoc["type"] = "crash";
+          crashDoc["count"] = totalCrashCount;
+          crashDoc["acc"] = accMag;
+          crashDoc["gyro"] = gyroMag;
+          
+          char dateTime[32];
+          getCurrentDateTime(dateTime, sizeof(dateTime));
+          crashDoc["dateTime"] = String(dateTime);
+          
+          String crashJson;
+          serializeJson(crashDoc, crashJson);
+          webSocket.broadcastTXT(crashJson);
+        }
         
         startWarningTone();  // Start 10-second warning tone
         Serial.println("\n🚨🚨🚨 CRASH CONFIRMED 🚨🚨🚨");
@@ -1558,9 +1601,9 @@ void loop() {
   // Store data point for web dashboard
   storeDataPoint(accMag, gyroMag, crashNow);
   
-  // Send real-time data via WebSocket
+  // Send real-time data via WebSocket (only if WiFi connected)
   static unsigned long lastWebSocketSend = 0;
-  if (millis() - lastWebSocketSend >= 200) {  // Send every 200ms
+  if (WiFi.status() == WL_CONNECTED && millis() - lastWebSocketSend >= 200) {  // Send every 200ms
     StaticJsonDocument<200> doc;
     doc["type"] = "sensor";
     doc["acc"] = accMag;
