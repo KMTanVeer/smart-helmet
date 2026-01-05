@@ -1475,39 +1475,40 @@ void setup() {
 void loop() {
   
   // ===== WIFI RECONNECTION CHECK =====
-  // Check WiFi connection every 30 seconds and attempt to reconnect if disconnected
+  // Non-blocking WiFi reconnection - checks every 30 seconds
   static unsigned long lastWiFiCheck = 0;
   static bool wifiWasConnected = true;
+  static bool reconnecting = false;
+  static unsigned long reconnectStartTime = 0;
   
-  if (millis() - lastWiFiCheck >= 30000) {  // Check every 30 seconds
-    if (WiFi.status() != WL_CONNECTED) {
+  // Check WiFi status every 30 seconds
+  if (millis() - lastWiFiCheck >= 30000) {
+    if (WiFi.status() != WL_CONNECTED && !reconnecting) {
       if (wifiWasConnected) {
-        Serial.println("⚠️ WiFi connection lost! Attempting to reconnect...");
+        Serial.println("⚠️ WiFi connection lost! Initiating reconnect...");
         wifiWasConnected = false;
       }
+      // Start non-blocking reconnection
       WiFi.disconnect();
-      delay(100);
       WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-      
-      int attempts = 0;
-      while (WiFi.status() != WL_CONNECTED && attempts < 20) {
-        delay(500);
-        Serial.print(".");
-        attempts++;
-      }
-      
-      if (WiFi.status() == WL_CONNECTED) {
+      reconnecting = true;
+      reconnectStartTime = millis();
+    } else if (WiFi.status() == WL_CONNECTED) {
+      if (reconnecting) {
         Serial.println("\n✅ WiFi reconnected!");
         Serial.print("📱 IP Address: ");
         Serial.println(WiFi.localIP());
-        wifiWasConnected = true;
-      } else {
-        Serial.println("\n❌ WiFi reconnection failed - will retry later");
+        reconnecting = false;
       }
-    } else {
       wifiWasConnected = true;
     }
     lastWiFiCheck = millis();
+  }
+  
+  // Check if reconnection is taking too long (10 seconds)
+  if (reconnecting && (millis() - reconnectStartTime > 10000)) {
+    Serial.println("\n❌ WiFi reconnection timeout - will retry later");
+    reconnecting = false;
   }
   
   // ===== HANDLE WEB SERVER & WEBSOCKET =====
