@@ -5,7 +5,7 @@
  * 
  * Enhanced version with:
  * - Passive buzzer with tones (power-on, warning, beep patterns)
- * - 3 emergency contacts for SMS
+ * - 2 emergency contacts for SMS
  * - Working battery monitoring
  * - Crash data logging with timestamps
  * 
@@ -49,7 +49,7 @@
  *   - Other side -> GND (uses internal pullup)
  * 
  * Battery Voltage Sensor:
- *   - Battery+ -> R1(100K) -> GPIO 34 (ADC) -> R2(100K) -> GND
+ *   - Battery+ -> R1(100K) -> GPIO 34 (ADC) -> R2(47K) -> GND
  *   - This creates voltage divider to read battery voltage safely
  * 
  * OLED Display (SSD1306):
@@ -61,7 +61,7 @@
  * CONFIGURATION:
  * --------------
  * Before uploading:
- * 1. Change PHONE_NUMBER_1, PHONE_NUMBER_2, PHONE_NUMBER_3
+ * 1. Change PHONE_NUMBER_1, PHONE_NUMBER_2
  * 2. Adjust ACC_THRESHOLD and GYRO_THRESHOLD if needed
  * 3. Calibrate battery voltage divider ratio if needed
  * 4. Install required libraries:
@@ -111,10 +111,9 @@ HardwareSerial sim800(1);  // Use UART1 for SIM800L communication
 #define SIM_RX 26  // ESP32 RX pin connected to SIM800L TX
 #define SIM_TX 27  // ESP32 TX pin connected to SIM800L RX
 
-// THREE EMERGENCY CONTACTS
+// TWO EMERGENCY CONTACTS
 const char PHONE_NUMBER_1[] = "+1234567890";   // ⚠️ CHANGE TO CONTACT 1 (REQUIRED)
 const char PHONE_NUMBER_2[] = "+1234567891";   // ⚠️ CHANGE TO CONTACT 2 (REQUIRED)
-const char PHONE_NUMBER_3[] = "+1234567892";   // ⚠️ CHANGE TO CONTACT 3 (REQUIRED)
 
 
 /* ================= PASSIVE BUZZER & BUTTON ================= */
@@ -123,7 +122,7 @@ const char PHONE_NUMBER_3[] = "+1234567892";   // ⚠️ CHANGE TO CONTACT 3 (RE
 
 /* ================= BATTERY MONITORING ================= */
 #define BATTERY_PIN 34  // ADC pin for battery voltage reading
-// Voltage divider: 100K (R1) + 47K (R2) → ratio ≈ 3.13
+// Voltage divider: 100K (R1) + 47K (R2) → ratio = (100K + 47K) / 47K ≈ 3.13
 
 // Battery voltage range: 3.3V (empty) to 4.2V (full)
 // After divider: 1.65V to 2.1V (within ESP32 ADC range)
@@ -449,7 +448,7 @@ bool sendSMSToNumber(float lat, float lon, const char* phoneNumber) {
   return false;
 }
 
-// Send SMS to all 3 contacts
+// Send SMS to all 2 contacts
 bool sendSMSToAllContacts(float lat, float lon) {
   if (!sim800Ready()) {
     Serial.println("❌ SIM800L NOT READY");
@@ -468,16 +467,10 @@ bool sendSMSToAllContacts(float lat, float lon) {
   if (sendSMSToNumber(lat, lon, PHONE_NUMBER_2)) {
     successCount++;
   }
-  delay(2000);  // Delay between messages
-  
-  // Send to contact 3
-  if (sendSMSToNumber(lat, lon, PHONE_NUMBER_3)) {
-    successCount++;
-  }
   
   Serial.print("✅ SMS sent to ");
   Serial.print(successCount);
-  Serial.println(" out of 3 contacts");
+  Serial.println(" out of 2 contacts");
   
   return successCount > 0;  // Success if at least one SMS sent
 }
