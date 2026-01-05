@@ -105,7 +105,7 @@ HardwareSerial sim800(1);  // Use UART1 for SIM800L communication
 #define SIM_TX 27  // ESP32 TX pin connected to SIM800L RX
 
 // SINGLE EMERGENCY CONTACT
-const char PHONE_NUMBER[] = "+1234567890";   // ⚠️ CHANGE TO YOUR EMERGENCY CONTACT (REQUIRED)
+const char PHONE_NUMBER[] = "+15551234567";   // ⚠️ CHANGE TO YOUR EMERGENCY CONTACT (REQUIRED)
 
 
 /* ================= PASSIVE BUZZER & BUTTON ================= */
