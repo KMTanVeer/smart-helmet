@@ -25,7 +25,7 @@ This is an enhanced version of `full-code.ino` that uses a **passive buzzer** to
 - **Purpose**: Indicate SMS is about to be sent
 
 ### 4. SMS Abort Feature
-- **Function**: Press the button during the 3-second beep pattern to abort SMS
+- **Function**: Press the Cancel Button (GPIO 33) during the 3-second beep pattern to abort SMS
 - **Effect**: Prevents SMS from being sent (useful for false positives)
 - **Feedback**: System logs "SMS ABORTED BY USER DURING BEEP PATTERN"
 
@@ -156,7 +156,7 @@ Before uploading:
 - Verify buzzer polarity
 
 ### SMS Not Aborting
-- Ensure button is pressed DURING the 3-second beep pattern
+- Ensure Cancel Button (GPIO 33) is pressed during the 3-second beep pattern
 - Button press must be held until you see log message
 - Check button wiring (GPIO 33 to GND with internal pullup)
 
@@ -216,7 +216,7 @@ T=13s+  : Silence (SMS sent or aborted)
 
 For issues or questions:
 1. Check test-passive-buzzer.ino works first
-2. Review SOUND_PATTERNS_GUIDE.md for passive buzzer details
+2. Review SOUND_PATTERNS_GUIDE.md for additional passive buzzer details (in repository)
 3. Verify all hardware connections
 4. Check serial output for error messages
 

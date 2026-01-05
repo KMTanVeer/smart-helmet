@@ -131,6 +131,8 @@ const char PHONE_NUMBER[] = "+1234567890";   // ⚠️ CHANGE TO YOUR EMERGENCY 
 /* ================= BUZZER TIMING ================= */
 #define WARNING_TONE_DURATION 10000  // 10 seconds warning tone
 #define BEEP_PATTERN_DURATION 3000   // 3 seconds beep pattern
+#define BEEP_CYCLE_TIME_MS 400       // 400ms per beep cycle (on + off)
+#define BEEP_ON_TIME_MS 200          // 200ms beep on duration
 
 /* ================= STATE VARIABLES ================= */
 bool crashDetected = false;  // Flag: crash has been confirmed
@@ -251,9 +253,9 @@ void handleBeepPattern() {
   if (buzzerState != BUZZER_BEEP_PATTERN) return;
   
   unsigned long elapsed = millis() - beepPatternStart;
-  unsigned long cycleTime = elapsed % 400;  // 400ms cycle (200ms on, 200ms off)
+  unsigned long cycleTime = elapsed % BEEP_CYCLE_TIME_MS;
   
-  if (cycleTime < 200) {
+  if (cycleTime < BEEP_ON_TIME_MS) {
     tone(BUZZER_PIN, NOTE_E5);
   } else {
     noTone(BUZZER_PIN);
