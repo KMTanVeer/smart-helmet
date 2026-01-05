@@ -112,9 +112,9 @@ HardwareSerial sim800(1);  // Use UART1 for SIM800L communication
 #define SIM_TX 27  // ESP32 TX pin connected to SIM800L RX
 
 // THREE EMERGENCY CONTACTS
-const char PHONE_NUMBER_1[] = "+8801758161680";   // ⚠️ CHANGE TO CONTACT 1
-const char PHONE_NUMBER_2[] = "+8801747213525";   // ⚠️ CHANGE TO CONTACT 2
-const char PHONE_NUMBER_3[] = "+8801234567890";   // ⚠️ CHANGE TO CONTACT 3
+const char PHONE_NUMBER_1[] = "+1234567890";   // ⚠️ CHANGE TO CONTACT 1 (REQUIRED)
+const char PHONE_NUMBER_2[] = "+1234567891";   // ⚠️ CHANGE TO CONTACT 2 (REQUIRED)
+const char PHONE_NUMBER_3[] = "+1234567892";   // ⚠️ CHANGE TO CONTACT 3 (REQUIRED)
 
 
 /* ================= PASSIVE BUZZER & BUTTON ================= */
@@ -1489,7 +1489,6 @@ void loop() {
         wifiWasConnected = false;
       }
       // Start non-blocking reconnection
-      WiFi.disconnect();
       WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
       reconnecting = true;
       reconnectStartTime = millis();
