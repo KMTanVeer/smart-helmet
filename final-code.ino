@@ -5,7 +5,7 @@
  * 
  * Enhanced version with:
  * - Passive buzzer with tones (power-on, warning, beep patterns)
- * - 3 emergency contacts for SMS
+ * - 2 emergency contacts for SMS
  * - Working battery monitoring
  * - Crash data logging with timestamps
  * 
@@ -49,7 +49,7 @@
  *   - Other side -> GND (uses internal pullup)
  * 
  * Battery Voltage Sensor:
- *   - Battery+ -> R1(100K) -> GPIO 34 (ADC) -> R2(100K) -> GND
+ *   - Battery+ -> R1(100K) -> GPIO 34 (ADC) -> R2(47K) -> GND
  *   - This creates voltage divider to read battery voltage safely
  * 
  * OLED Display (SSD1306):
@@ -61,7 +61,7 @@
  * CONFIGURATION:
  * --------------
  * Before uploading:
- * 1. Change PHONE_NUMBER_1, PHONE_NUMBER_2, PHONE_NUMBER_3
+ * 1. Change PHONE_NUMBER_1, PHONE_NUMBER_2
  * 2. Adjust ACC_THRESHOLD and GYRO_THRESHOLD if needed
  * 3. Calibrate battery voltage divider ratio if needed
  * 4. Install required libraries:
@@ -111,9 +111,9 @@ HardwareSerial sim800(1);  // Use UART1 for SIM800L communication
 #define SIM_RX 26  // ESP32 RX pin connected to SIM800L TX
 #define SIM_TX 27  // ESP32 TX pin connected to SIM800L RX
 
-// THREE EMERGENCY CONTACTS
-const char PHONE_NUMBER_1[] = "+8801758161680";   // ⚠️ CHANGE TO CONTACT 1
-const char PHONE_NUMBER_2[] = "+8801747213525";   // ⚠️ CHANGE TO CONTACT 2
+// TWO EMERGENCY CONTACTS
+const char PHONE_NUMBER_1[] = "+1234567890";   // ⚠️ CHANGE TO CONTACT 1 (REQUIRED)
+const char PHONE_NUMBER_2[] = "+1234567891";   // ⚠️ CHANGE TO CONTACT 2 (REQUIRED)
 
 
 /* ================= PASSIVE BUZZER & BUTTON ================= */
@@ -122,7 +122,7 @@ const char PHONE_NUMBER_2[] = "+8801747213525";   // ⚠️ CHANGE TO CONTACT 2
 
 /* ================= BATTERY MONITORING ================= */
 #define BATTERY_PIN 34  // ADC pin for battery voltage reading
-// Voltage divider: 100K (R1) + 47K (R2) → ratio ≈ 3.13
+// Voltage divider: 100K (R1) + 47K (R2) → ratio = (100K + 47K) / 47K ≈ 3.13
 
 // Battery voltage range: 3.3V (empty) to 4.2V (full)
 // After divider: 1.65V to 2.1V (within ESP32 ADC range)
@@ -379,7 +379,7 @@ int readBatteryPercent() {
 
   float adc = sum / 20.0;
   float vAdc = (adc / 4095.0) * 3.3;
-  float batteryVoltage = vAdc * 3.13;   // ✅ 100k / 47k divider
+  float batteryVoltage = vAdc * VOLTAGE_DIVIDER_RATIO;   // ✅ Use defined constant
 
   int rawPercent = (int)((batteryVoltage - BATTERY_EMPTY_VOLTAGE) * 100.0 /
                          (BATTERY_FULL_VOLTAGE - BATTERY_EMPTY_VOLTAGE));
@@ -448,7 +448,7 @@ bool sendSMSToNumber(float lat, float lon, const char* phoneNumber) {
   return false;
 }
 
-// Send SMS to all 3 contacts
+// Send SMS to all 2 contacts
 bool sendSMSToAllContacts(float lat, float lon) {
   if (!sim800Ready()) {
     Serial.println("❌ SIM800L NOT READY");
@@ -1400,22 +1400,24 @@ void setup() {
     Serial.println("System will continue with local features only");
   }
   
-  // Setup web server routes
-  server.on("/", handleRoot);
-  server.on("/updateThresholds", HTTP_POST, handleUpdateThresholds);
-  server.on("/getSettings", handleGetSettings);
-  server.on("/getCrashHistory", handleGetCrashHistory);
-  server.on("/downloadCSV", handleDownloadCSV);
-  server.on("/downloadCrashCSV", handleDownloadCrashCSV);
-  
-  // Start web server
-  server.begin();
-  Serial.println("✅ Web server started on port 80");
-  
-  // Start WebSocket server
-  webSocket.begin();
-  webSocket.onEvent(webSocketEvent);
-  Serial.println("✅ WebSocket server started on port 81");
+  // Setup web server routes (only if WiFi connected)
+  if (WiFi.status() == WL_CONNECTED) {
+    server.on("/", handleRoot);
+    server.on("/updateThresholds", HTTP_POST, handleUpdateThresholds);
+    server.on("/getSettings", handleGetSettings);
+    server.on("/getCrashHistory", handleGetCrashHistory);
+    server.on("/downloadCSV", handleDownloadCSV);
+    server.on("/downloadCrashCSV", handleDownloadCrashCSV);
+    
+    // Start web server
+    server.begin();
+    Serial.println("✅ Web server started on port 80");
+    
+    // Start WebSocket server
+    webSocket.begin();
+    webSocket.onEvent(webSocketEvent);
+    Serial.println("✅ WebSocket server started on port 81");
+  }
 
   // Initialize OLED Display
   Serial.println("🔧 Initializing OLED Display...");
@@ -1465,9 +1467,48 @@ void setup() {
 
 void loop() {
   
+  // ===== WIFI RECONNECTION CHECK =====
+  // Non-blocking WiFi reconnection - checks every 30 seconds
+  static unsigned long lastWiFiCheck = 0;
+  static bool wifiWasConnected = true;
+  static bool reconnecting = false;
+  static unsigned long reconnectStartTime = 0;
+  
+  // Check WiFi status every 30 seconds
+  if (millis() - lastWiFiCheck >= 30000) {
+    if (WiFi.status() != WL_CONNECTED && !reconnecting) {
+      if (wifiWasConnected) {
+        Serial.println("⚠️ WiFi connection lost! Initiating reconnect...");
+        wifiWasConnected = false;
+      }
+      // Start non-blocking reconnection
+      WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+      reconnecting = true;
+      reconnectStartTime = millis();
+    } else if (WiFi.status() == WL_CONNECTED) {
+      if (reconnecting) {
+        Serial.println("\n✅ WiFi reconnected!");
+        Serial.print("📱 IP Address: ");
+        Serial.println(WiFi.localIP());
+        reconnecting = false;
+      }
+      wifiWasConnected = true;
+    }
+    lastWiFiCheck = millis();
+  }
+  
+  // Check if reconnection is taking too long (10 seconds)
+  if (reconnecting && (millis() - reconnectStartTime > 10000)) {
+    Serial.println("\n❌ WiFi reconnection timeout - will retry later");
+    reconnecting = false;
+  }
+  
   // ===== HANDLE WEB SERVER & WEBSOCKET =====
-  server.handleClient();
-  webSocket.loop();
+  // Only handle if WiFi is connected
+  if (WiFi.status() == WL_CONNECTED) {
+    server.handleClient();
+    webSocket.loop();
+  }
 
   // ===== CANCEL BUTTON CHECK =====
   if (digitalRead(CANCEL_BTN) == LOW) {
@@ -1532,20 +1573,22 @@ void loop() {
         crashTime = millis();
         totalCrashCount++;
         
-        // Send crash event via WebSocket
-        StaticJsonDocument<200> crashDoc;
-        crashDoc["type"] = "crash";
-        crashDoc["count"] = totalCrashCount;
-        crashDoc["acc"] = accMag;
-        crashDoc["gyro"] = gyroMag;
-        
-        char dateTime[32];
-        getCurrentDateTime(dateTime, sizeof(dateTime));
-        crashDoc["dateTime"] = String(dateTime);
-        
-        String crashJson;
-        serializeJson(crashDoc, crashJson);
-        webSocket.broadcastTXT(crashJson);
+        // Send crash event via WebSocket (only if WiFi connected)
+        if (WiFi.status() == WL_CONNECTED) {
+          StaticJsonDocument<200> crashDoc;
+          crashDoc["type"] = "crash";
+          crashDoc["count"] = totalCrashCount;
+          crashDoc["acc"] = accMag;
+          crashDoc["gyro"] = gyroMag;
+          
+          char dateTime[32];
+          getCurrentDateTime(dateTime, sizeof(dateTime));
+          crashDoc["dateTime"] = String(dateTime);
+          
+          String crashJson;
+          serializeJson(crashDoc, crashJson);
+          webSocket.broadcastTXT(crashJson);
+        }
         
         startWarningTone();  // Start 10-second warning tone
         Serial.println("\n🚨🚨🚨 CRASH CONFIRMED 🚨🚨🚨");
@@ -1558,9 +1601,9 @@ void loop() {
   // Store data point for web dashboard
   storeDataPoint(accMag, gyroMag, crashNow);
   
-  // Send real-time data via WebSocket
+  // Send real-time data via WebSocket (only if WiFi connected)
   static unsigned long lastWebSocketSend = 0;
-  if (millis() - lastWebSocketSend >= 200) {  // Send every 200ms
+  if (WiFi.status() == WL_CONNECTED && millis() - lastWebSocketSend >= 200) {  // Send every 200ms
     StaticJsonDocument<200> doc;
     doc["type"] = "sensor";
     doc["acc"] = accMag;
