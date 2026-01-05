@@ -114,6 +114,7 @@ HardwareSerial sim800(1);  // Use UART1 for SIM800L communication
 // THREE EMERGENCY CONTACTS
 const char PHONE_NUMBER_1[] = "+8801758161680";   // ⚠️ CHANGE TO CONTACT 1
 const char PHONE_NUMBER_2[] = "+8801747213525";   // ⚠️ CHANGE TO CONTACT 2
+const char PHONE_NUMBER_3[] = "+8801234567890";   // ⚠️ CHANGE TO CONTACT 3
 
 
 /* ================= PASSIVE BUZZER & BUTTON ================= */
@@ -379,7 +380,7 @@ int readBatteryPercent() {
 
   float adc = sum / 20.0;
   float vAdc = (adc / 4095.0) * 3.3;
-  float batteryVoltage = vAdc * 3.13;   // ✅ 100k / 47k divider
+  float batteryVoltage = vAdc * VOLTAGE_DIVIDER_RATIO;   // ✅ Use defined constant
 
   int rawPercent = (int)((batteryVoltage - BATTERY_EMPTY_VOLTAGE) * 100.0 /
                          (BATTERY_FULL_VOLTAGE - BATTERY_EMPTY_VOLTAGE));
@@ -467,10 +468,16 @@ bool sendSMSToAllContacts(float lat, float lon) {
   if (sendSMSToNumber(lat, lon, PHONE_NUMBER_2)) {
     successCount++;
   }
+  delay(2000);  // Delay between messages
+  
+  // Send to contact 3
+  if (sendSMSToNumber(lat, lon, PHONE_NUMBER_3)) {
+    successCount++;
+  }
   
   Serial.print("✅ SMS sent to ");
   Serial.print(successCount);
-  Serial.println(" out of 2 contacts");
+  Serial.println(" out of 3 contacts");
   
   return successCount > 0;  // Success if at least one SMS sent
 }
