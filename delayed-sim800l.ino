@@ -26,8 +26,12 @@ HardwareSerial sim800(2);   // UART2 for SIM800L
 #define SIM_TX 17   // ESP32 TX2 -> SIM800 RX
 #define BUZZER_PIN 25   // Buzzer pin
 
+/* ================= TIMING CONSTANTS ================= */
+#define BUZZER_DELAY_MS 400      // Delay between buzzer and SMS (300-500ms range)
+#define BUZZER_DURATION_MS 5000  // How long to keep buzzer on after crash
+
 /* ================= CONFIGURATION ================= */
-const char PHONE_NUMBER[] = "+8801747213525";  // ⚠️ CHANGE TO YOUR EMERGENCY CONTACT
+const char PHONE_NUMBER[] = "+1234567890";  // ⚠️ CHANGE TO YOUR EMERGENCY CONTACT (REQUIRED)
 
 /* ================= UTILITIES ================= */
 
@@ -87,9 +91,11 @@ void handleCrashDetected() {
   Serial.println("🔊 Activating buzzer...");
   digitalWrite(BUZZER_PIN, HIGH);
   
-  // STEP 2: Delay 400ms (middle of 300-500ms range)
-  Serial.println("⏱️  Delaying 400ms before SMS...");
-  delay(400);
+  // STEP 2: Delay (middle of 300-500ms range)
+  Serial.print("⏱️  Delaying ");
+  Serial.print(BUZZER_DELAY_MS);
+  Serial.println("ms before SMS...");
+  delay(BUZZER_DELAY_MS);
   
   // STEP 3: THEN send SMS
   Serial.println("📱 Power-hungry SIM800L TX starting now...");
@@ -131,10 +137,13 @@ void setup() {
   // Handle the simulated crash
   handleCrashDetected();
   
-  // Keep buzzer on for 5 more seconds, then turn off
-  delay(5000);
+  // Keep buzzer on for configured duration, then turn off
+  Serial.print("\n⏱️  Keeping buzzer on for ");
+  Serial.print(BUZZER_DURATION_MS);
+  Serial.println("ms...");
+  delay(BUZZER_DURATION_MS);
   digitalWrite(BUZZER_PIN, LOW);
-  Serial.println("\n🔇 Buzzer turned off");
+  Serial.println("🔇 Buzzer turned off");
   
   Serial.println("\n========================================");
   Serial.println("   TEST COMPLETE                        ");

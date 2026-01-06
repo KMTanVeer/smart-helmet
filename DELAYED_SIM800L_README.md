@@ -52,11 +52,22 @@ Buzzer:
 
 ## Configuration
 
+### Timing Configuration
+You can adjust the timing constants at the top of the file:
+
+```cpp
+#define BUZZER_DELAY_MS 400      // Delay between buzzer and SMS (300-500ms range)
+#define BUZZER_DURATION_MS 5000  // How long to keep buzzer on after crash
+```
+
+### Phone Number Configuration
 Before uploading, change the phone number in the code:
 
 ```cpp
-const char PHONE_NUMBER[] = "+8801747213525";  // ⚠️ CHANGE TO YOUR EMERGENCY CONTACT
+const char PHONE_NUMBER[] = "+1234567890";  // ⚠️ CHANGE TO YOUR EMERGENCY CONTACT (REQUIRED)
 ```
+
+**IMPORTANT:** The default phone number is a placeholder. You MUST change it to your actual emergency contact number before deploying the system.
 
 ## Testing
 
@@ -136,7 +147,10 @@ if (crashDetected && gps.location.isValid() && !smsSent) {
 ## Power Considerations
 
 ### Why This Sequence Matters:
-- **SIM800L TX current:** Up to 2A during transmission bursts
+- **SIM800L TX current:** 
+  - Peak: Up to 2A during transmission bursts (lasting ~577ms per burst)
+  - Average during call/SMS: ~300-500mA
+  - Idle: ~10mA
 - **Buzzer current:** Typically 30-50mA
 - **Issue:** If both activate simultaneously, voltage drop can prevent buzzer from latching
 
