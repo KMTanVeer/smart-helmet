@@ -71,7 +71,10 @@ int IMPACT_TIME_MS = 30;        // milliseconds
 /* ================= STATE VARIABLES ================= */
 bool crashDetected = false;
 unsigned long impactStart = 0;
+unsigned long crashResetTime = 0;  // Time when crash flag should be reset
 int crashCount = 0;
+const unsigned long CRASH_RESET_DELAY = 1000;  // Reset after 1 second
+const size_t TIME_BUFFER_SIZE = 30;  // Buffer size for time string
 
 /* ================= WEB SERVER & WEBSOCKET ================= */
 WebServer server(80);
@@ -97,9 +100,10 @@ String getDhakaTime() {
   }
   
   unsigned long epochTime = timeClient.getEpochTime();
-  struct tm *timeInfo = gmtime((time_t*)&epochTime);
+  time_t timeValue = epochTime;
+  struct tm *timeInfo = gmtime(&timeValue);
   
-  char timeBuffer[30];
+  char timeBuffer[TIME_BUFFER_SIZE];
   strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %H:%M:%S", timeInfo);
   return String(timeBuffer);
 }
@@ -1044,13 +1048,18 @@ void loop() {
         serializeJson(crashDoc, crashJson);
         webSocket.broadcastTXT(crashJson);
         
-        // Use non-blocking delay for crash flag reset
-        // The flag will be reset on next loop iteration
-        crashDetected = false;
+        // Set crash reset time for non-blocking delay
+        crashResetTime = millis() + CRASH_RESET_DELAY;
       }
     }
   } else {
     impactStart = 0;
+  }
+  
+  // Reset crash flag after timeout (non-blocking)
+  if (crashDetected && crashResetTime > 0 && millis() >= crashResetTime) {
+    crashDetected = false;
+    crashResetTime = 0;
   }
   
   Serial.println();
