@@ -44,7 +44,6 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
-#include <SPIFFS.h>
 #include <ArduinoJson.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
@@ -98,18 +97,11 @@ String getDhakaTime() {
   }
   
   unsigned long epochTime = timeClient.getEpochTime();
-  struct tm *timeInfo = localtime((time_t*)&epochTime);
+  struct tm *timeInfo = gmtime((time_t*)&epochTime);
   
   char timeBuffer[30];
   strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %H:%M:%S", timeInfo);
   return String(timeBuffer);
-}
-
-String getFormattedDateTime() {
-  if (!timeClient.isTimeSet()) {
-    return "Syncing time...";
-  }
-  return timeClient.getFormattedDate() + " " + timeClient.getFormattedTime();
 }
 
 /* ================= MPU FUNCTIONS ================= */
@@ -1052,8 +1044,8 @@ void loop() {
         serializeJson(crashDoc, crashJson);
         webSocket.broadcastTXT(crashJson);
         
-        // Reset crash flag after 1 second
-        delay(1000);
+        // Use non-blocking delay for crash flag reset
+        // The flag will be reset on next loop iteration
         crashDetected = false;
       }
     }
