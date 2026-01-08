@@ -172,7 +172,7 @@ void handleRoot() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MPU Test Dashboard - Dhaka BD</title>
+    <title>Smart Helmet IoT Analytics Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -181,180 +181,286 @@ void handleRoot() {
             box-sizing: border-box;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
             min-height: 100vh;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         .header {
-            background: white;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
             padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
             text-align: center;
         }
         h1 {
-            color: #667eea;
-            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
         .subtitle {
-            color: #666;
+            color: #64748b;
             font-size: 14px;
+            font-weight: 500;
         }
         .timezone-badge {
-            background: #22c55e;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            padding: 5px 15px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 600;
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 12px;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
         .current-time {
-            font-size: 18px;
-            color: #333;
-            margin-top: 10px;
+            font-size: 16px;
+            color: #475569;
+            margin-top: 12px;
             font-weight: 600;
         }
-        .status {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 20px;
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 12px;
+            font-weight: 700;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        .status-item {
-            background: #f9fafb;
-            padding: 10px 20px;
-            border-radius: 10px;
+        .connected {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        .disconnected {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .metric-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+        .metric-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .metric-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .metric-value.normal {
+            color: #10b981;
+        }
+        .metric-value.warning {
+            color: #f59e0b;
+        }
+        .metric-value.danger {
+            color: #ef4444;
+        }
+        .metric-unit {
             font-size: 14px;
+            color: #94a3b8;
             font-weight: 600;
         }
-        .status-ok { color: #22c55e; }
-        .status-warn { color: #f59e0b; }
-        .status-error { color: #ef4444; }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-indicator.green {
+            background: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        .status-indicator.red {
+            background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
         .card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            padding: 28px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
         }
         h2 {
-            color: #333;
+            color: #1e293b;
             margin-bottom: 20px;
-            font-size: 1.3em;
+            font-size: 1.4em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        h2 .icon {
+            margin-right: 10px;
         }
         .chart-container {
             position: relative;
-            height: 300px;
-            margin-bottom: 20px;
+            height: 350px;
+            margin-bottom: 10px;
         }
         .controls {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
         input, button {
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 2px solid #667eea;
+            padding: 12px 18px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
             font-size: 14px;
-        }
-        button {
-            background: #667eea;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
             transition: all 0.3s;
         }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
         button:hover {
-            background: #5568d3;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
         }
         button:active {
             transform: translateY(0);
         }
-        .crash-list {
-            max-height: 400px;
+        .crash-status-banner {
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+        .crash-status-banner.no-crash {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #047857;
+            border: 2px solid #10b981;
+        }
+        .crash-status-banner.crash-detected {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+            border: 2px solid #ef4444;
+            animation: pulse 1.5s infinite;
+        }
+        .crash-timestamp {
+            font-size: 14px;
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
             overflow-y: auto;
         }
-        .crash-item {
-            background: #fee;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            border-left: 4px solid #ef4444;
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
         }
-        .crash-time {
-            font-weight: bold;
-            color: #ef4444;
+        thead {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-        .crash-data {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin: 10px 0;
-            font-size: 0.9em;
+        th {
+            padding: 14px;
+            text-align: left;
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #cbd5e1;
+        }
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #475569;
+            font-size: 14px;
+        }
+        tr:hover {
+            background: #f8fafc;
+        }
+        .severity-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        .severity-low {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .severity-medium {
+            background: #fed7aa;
+            color: #c2410c;
+        }
+        .severity-high {
+            background: #fecaca;
+            color: #991b1b;
         }
         @media (max-width: 768px) {
             .chart-container {
-                height: 250px;
+                height: 280px;
             }
-            .controls {
-                flex-direction: column;
+            .metrics-grid {
+                grid-template-columns: 1fr;
             }
-            input, button {
-                width: 100%;
+            h1 {
+                font-size: 1.5em;
             }
-        }
-        .connection-status {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 1000;
-        }
-        .connected {
-            background: #22c55e;
-            color: white;
-        }
-        .disconnected {
-            background: #ef4444;
-            color: white;
-        }
-        .realtime-values {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .value-box {
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        .value-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        .value-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
         }
     </style>
 </head>
@@ -363,80 +469,112 @@ void handleRoot() {
     
     <div class="container">
         <div class="header">
-            <h1>🧪 MPU Test Dashboard</h1>
-            <p class="subtitle">Real-Time Crash Detection Testing & Data Recording</p>
+            <h1>⛑️ Smart Helmet IoT Analytics Dashboard</h1>
+            <p class="subtitle">Real-Time MPU6050 Sensor Monitoring & Crash Detection System</p>
             <div class="timezone-badge">🇧🇩 Dhaka, Bangladesh (GMT+6)</div>
             <div class="current-time" id="currentTime">Loading time...</div>
-            <div class="status">
-                <div class="status-item">Status: <span id="systemStatus" class="status-ok">Monitoring</span></div>
-                <div class="status-item">Crashes Detected: <span id="crashCount" class="status-warn">0</span></div>
-                <div class="status-item">Data Points: <span id="dataPoints">0</span></div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Resultant Acceleration</div>
+                <div class="metric-value normal" id="metricAcc">0.00</div>
+                <div class="metric-unit">g-force</div>
+                <div style="margin-top: 12px;">
+                    <span class="status-indicator green" id="accIndicator"></span>
+                    <span style="font-size: 12px; color: #64748b; font-weight: 600;" id="accStatus">Normal</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Angular Velocity</div>
+                <div class="metric-value normal" id="metricGyro">0.00</div>
+                <div class="metric-unit">deg/s</div>
+                <div style="margin-top: 12px;">
+                    <span class="status-indicator green" id="gyroIndicator"></span>
+                    <span style="font-size: 12px; color: #64748b; font-weight: 600;" id="gyroStatus">Normal</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Crash Detection Threshold</div>
+                <div class="metric-value" style="color: #667eea; font-size: 28px;" id="metricThreshold">2.50g / 120°/s</div>
+                <div class="metric-unit">Configurable limits</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Total Crashes Detected</div>
+                <div class="metric-value warning" id="metricCrashCount">0</div>
+                <div class="metric-unit">events recorded</div>
             </div>
         </div>
 
-        <div class="card">
-            <h2>📊 Real-Time Values</h2>
-            <div class="realtime-values">
-                <div class="value-box">
-                    <div class="value-label">Acceleration (g)</div>
-                    <div class="value-number" id="currentAcc">0.00</div>
-                </div>
-                <div class="value-box">
-                    <div class="value-label">Gyroscope (°/s)</div>
-                    <div class="value-number" id="currentGyro">0.00</div>
-                </div>
-                <div class="value-box">
-                    <div class="value-label">Acc Threshold</div>
-                    <div class="value-number" id="currentAccThreshold" style="font-size: 20px;">2.50</div>
-                </div>
-                <div class="value-box">
-                    <div class="value-label">Gyro Threshold</div>
-                    <div class="value-number" id="currentGyroThreshold" style="font-size: 20px;">120.0</div>
-                </div>
-            </div>
+        <div class="crash-status-banner no-crash" id="crashStatusBanner">
+            <span class="status-indicator green" id="crashIndicator"></span>
+            <span id="crashStatusText">No Crash Detected</span>
+            <div class="crash-timestamp" id="crashTimestamp" style="display:none;"></div>
         </div>
 
         <div class="card">
-            <h2>⚙️ Crash Detection Configuration</h2>
+            <h2><span class="icon">⚙️</span> Threshold Configuration</h2>
             <div class="controls">
                 <input type="number" id="accThreshold" placeholder="Acc Threshold (g)" step="0.1" min="1" max="10" value="2.5">
                 <input type="number" id="gyroThreshold" placeholder="Gyro Threshold (°/s)" step="10" min="50" max="300" value="120">
                 <input type="number" id="impactTime" placeholder="Impact Time (ms)" step="5" min="10" max="100" value="30">
                 <button onclick="updateThresholds()">Update Thresholds</button>
-                <button onclick="getCurrentSettings()">Get Current Settings</button>
+                <button onclick="getCurrentSettings()">Refresh Settings</button>
             </div>
         </div>
 
         <div class="card">
-            <h2>📈 Live Acceleration Graph (Crashes in RED)</h2>
+            <h2><span class="icon">📈</span> Graph 1: Resultant Acceleration (G-Force)</h2>
             <div class="chart-container">
                 <canvas id="accChart"></canvas>
             </div>
         </div>
 
         <div class="card">
-            <h2>📈 Live Gyroscope Graph (Crashes in RED)</h2>
+            <h2><span class="icon">📈</span> Graph 2: Angular Velocity Magnitude</h2>
             <div class="chart-container">
                 <canvas id="gyroChart"></canvas>
             </div>
         </div>
 
         <div class="card">
-            <h2>🚨 Crash History (Dhaka Time)</h2>
+            <h2><span class="icon">📊</span> Graph 3: Combined Crash Analysis</h2>
+            <div class="chart-container">
+                <canvas id="combinedChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><span class="icon">🧾</span> Crash History Table</h2>
             <div class="controls">
                 <button onclick="refreshCrashHistory()">Refresh History</button>
                 <button onclick="downloadCSV()">Download CSV</button>
                 <button onclick="clearAllData()">Clear All Data</button>
             </div>
-            <div id="crashList" class="crash-list">
-                <p style="text-align: center; color: #999; padding: 20px;">No crashes detected yet</p>
+            <div class="table-container">
+                <table id="crashTable">
+                    <thead>
+                        <tr>
+                            <th>Crash ID</th>
+                            <th>Date & Time</th>
+                            <th>Peak G-Force</th>
+                            <th>Peak Angular Velocity</th>
+                            <th>Crash Severity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="crashTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px;">No crashes detected yet</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
         let ws;
-        let accChart, gyroChart;
+        let accChart, gyroChart, combinedChart;
         const maxDataPoints = 50;
         let accData = [];
         let gyroData = [];
@@ -446,6 +584,9 @@ void handleRoot() {
         let gyroPointColors = [];
         let accPointRadii = [];
         let gyroPointRadii = [];
+        let accThresholdValue = 2.5;
+        let gyroThresholdValue = 120.0;
+        let crashIdCounter = 1;
 
         // Update current time display
         function updateCurrentTime() {
@@ -459,24 +600,46 @@ void handleRoot() {
             });
         }
 
-        // Initialize charts with crash point highlighting
+        // Calculate crash severity
+        function calculateSeverity(acc, gyro) {
+            const accFactor = acc / accThresholdValue;
+            const gyroFactor = gyro / gyroThresholdValue;
+            const severity = (accFactor + gyroFactor) / 2;
+            
+            if (severity >= 2.0) return 'High';
+            if (severity >= 1.5) return 'Medium';
+            return 'Low';
+        }
+
+        // Initialize charts with crash point highlighting and threshold lines
         function initCharts() {
+            // Chart 1: Acceleration with threshold line
             const accCtx = document.getElementById('accChart').getContext('2d');
             accChart = new Chart(accCtx, {
                 type: 'line',
                 data: {
                     labels: timeLabels,
                     datasets: [{
-                        label: 'Acceleration (g)',
+                        label: 'Resultant G-Force',
                         data: accData,
                         borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 2,
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        borderWidth: 3,
                         tension: 0.4,
                         pointRadius: accPointRadii,
                         pointBackgroundColor: accPointColors,
                         pointBorderColor: accPointColors,
-                        pointHoverRadius: 8
+                        pointHoverRadius: 8,
+                        fill: true
+                    }, {
+                        label: 'Crash Threshold',
+                        data: Array(maxDataPoints).fill(accThresholdValue),
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        fill: false
                     }]
                 },
                 options: {
@@ -487,16 +650,46 @@ void handleRoot() {
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Acceleration (g)'
+                                text: 'g',
+                                color: '#000000',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                color: '#1e293b',
+                                font: {
+                                    weight: '600'
+                                }
                             }
                         },
                         x: {
-                            display: false
+                            title: {
+                                display: true,
+                                text: 'Time',
+                                color: '#1e293b',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            display: true,
+                            grid: {
+                                display: false
+                            }
                         }
                     },
                     plugins: {
                         legend: {
-                            display: true
+                            display: true,
+                            labels: {
+                                font: {
+                                    weight: '600'
+                                }
+                            }
                         },
                         tooltip: {
                             callbacks: {
@@ -511,27 +704,38 @@ void handleRoot() {
                         }
                     },
                     animation: {
-                        duration: 0
+                        duration: 300
                     }
                 }
             });
 
+            // Chart 2: Angular Velocity with threshold line
             const gyroCtx = document.getElementById('gyroChart').getContext('2d');
             gyroChart = new Chart(gyroCtx, {
                 type: 'line',
                 data: {
                     labels: timeLabels,
                     datasets: [{
-                        label: 'Gyroscope (°/s)',
+                        label: 'Angular Velocity Magnitude',
                         data: gyroData,
                         borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 2,
+                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                        borderWidth: 3,
                         tension: 0.4,
                         pointRadius: gyroPointRadii,
                         pointBackgroundColor: gyroPointColors,
                         pointBorderColor: gyroPointColors,
-                        pointHoverRadius: 8
+                        pointHoverRadius: 8,
+                        fill: true
+                    }, {
+                        label: 'Crash Threshold',
+                        data: Array(maxDataPoints).fill(gyroThresholdValue),
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        fill: false
                     }]
                 },
                 options: {
@@ -542,16 +746,46 @@ void handleRoot() {
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Gyroscope (°/s)'
+                                text: '°/s',
+                                color: '#000000',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                color: '#1e293b',
+                                font: {
+                                    weight: '600'
+                                }
                             }
                         },
                         x: {
-                            display: false
+                            title: {
+                                display: true,
+                                text: 'Time',
+                                color: '#1e293b',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            display: true,
+                            grid: {
+                                display: false
+                            }
                         }
                     },
                     plugins: {
                         legend: {
-                            display: true
+                            display: true,
+                            labels: {
+                                font: {
+                                    weight: '600'
+                                }
+                            }
                         },
                         tooltip: {
                             callbacks: {
@@ -566,7 +800,137 @@ void handleRoot() {
                         }
                     },
                     animation: {
-                        duration: 0
+                        duration: 300
+                    }
+                }
+            });
+
+            // Chart 3: Combined Analysis with dual Y-axis
+            const combinedCtx = document.getElementById('combinedChart').getContext('2d');
+            combinedChart = new Chart(combinedCtx, {
+                type: 'line',
+                data: {
+                    labels: timeLabels,
+                    datasets: [{
+                        label: 'G-Force',
+                        data: accData,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        pointRadius: accPointRadii,
+                        pointBackgroundColor: accPointColors,
+                        pointBorderColor: accPointColors,
+                        yAxisID: 'y',
+                        fill: false
+                    }, {
+                        label: 'Angular Velocity',
+                        data: gyroData,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        pointRadius: gyroPointRadii,
+                        pointBackgroundColor: gyroPointColors,
+                        pointBorderColor: gyroPointColors,
+                        yAxisID: 'y1',
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'G-Force (g)',
+                                color: '#3b82f6',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(59, 130, 246, 0.1)'
+                            },
+                            ticks: {
+                                color: '#3b82f6',
+                                font: {
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Angular Velocity (°/s)',
+                                color: '#10b981',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                            ticks: {
+                                color: '#10b981',
+                                font: {
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time',
+                                color: '#1e293b',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            display: true,
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                font: {
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const index = context.dataIndex;
+                                    if (accPointColors[index] === '#ef4444' || gyroPointColors[index] === '#ef4444') {
+                                        return '🚨 CRASH DETECTED';
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 300
                     }
                 }
             });
@@ -613,9 +977,45 @@ void handleRoot() {
 
         // Update sensor data on charts with RED crash markers
         function updateSensorData(data) {
-            // Update real-time values
-            document.getElementById('currentAcc').textContent = data.acc.toFixed(2);
-            document.getElementById('currentGyro').textContent = data.gyro.toFixed(2);
+            // Update metric cards
+            const metricAcc = document.getElementById('metricAcc');
+            const metricGyro = document.getElementById('metricGyro');
+            const accIndicator = document.getElementById('accIndicator');
+            const gyroIndicator = document.getElementById('gyroIndicator');
+            const accStatus = document.getElementById('accStatus');
+            const gyroStatus = document.getElementById('gyroStatus');
+            
+            metricAcc.textContent = data.acc.toFixed(2);
+            metricGyro.textContent = data.gyro.toFixed(2);
+            
+            // Update status indicators
+            if (data.acc > accThresholdValue) {
+                metricAcc.className = 'metric-value danger';
+                accIndicator.className = 'status-indicator red';
+                accStatus.textContent = 'Crash Level';
+            } else if (data.acc > accThresholdValue * 0.7) {
+                metricAcc.className = 'metric-value warning';
+                accIndicator.className = 'status-indicator red';
+                accStatus.textContent = 'Warning';
+            } else {
+                metricAcc.className = 'metric-value normal';
+                accIndicator.className = 'status-indicator green';
+                accStatus.textContent = 'Normal';
+            }
+            
+            if (data.gyro > gyroThresholdValue) {
+                metricGyro.className = 'metric-value danger';
+                gyroIndicator.className = 'status-indicator red';
+                gyroStatus.textContent = 'Crash Level';
+            } else if (data.gyro > gyroThresholdValue * 0.7) {
+                metricGyro.className = 'metric-value warning';
+                gyroIndicator.className = 'status-indicator red';
+                gyroStatus.textContent = 'Warning';
+            } else {
+                metricGyro.className = 'metric-value normal';
+                gyroIndicator.className = 'status-indicator green';
+                gyroStatus.textContent = 'Normal';
+            }
             
             // Update charts
             if (accData.length >= maxDataPoints) {
@@ -630,7 +1030,12 @@ void handleRoot() {
             
             accData.push(data.acc);
             gyroData.push(data.gyro);
-            timeLabels.push('');
+            
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                           now.getMinutes().toString().padStart(2, '0') + ':' + 
+                           now.getSeconds().toString().padStart(2, '0');
+            timeLabels.push(timeStr);
             
             // Mark crash points in RED with larger radius
             if (data.crash) {
@@ -639,14 +1044,25 @@ void handleRoot() {
                 accPointRadii.push(10);
                 gyroPointRadii.push(10);
                 
-                document.getElementById('systemStatus').className = 'status-error';
-                document.getElementById('systemStatus').textContent = '🚨 CRASH DETECTED!';
+                // Update crash status banner
+                const banner = document.getElementById('crashStatusBanner');
+                const indicator = document.getElementById('crashIndicator');
+                const statusText = document.getElementById('crashStatusText');
+                const timestamp = document.getElementById('crashTimestamp');
                 
-                // Reset status after 3 seconds
+                banner.className = 'crash-status-banner crash-detected';
+                indicator.className = 'status-indicator red';
+                statusText.textContent = '🚨 Crash Detected!';
+                timestamp.style.display = 'block';
+                timestamp.textContent = 'Detected at: ' + timeStr;
+                
+                // Reset after 5 seconds
                 setTimeout(() => {
-                    document.getElementById('systemStatus').className = 'status-ok';
-                    document.getElementById('systemStatus').textContent = 'Monitoring';
-                }, 3000);
+                    banner.className = 'crash-status-banner no-crash';
+                    indicator.className = 'status-indicator green';
+                    statusText.textContent = 'No Crash Detected';
+                    timestamp.style.display = 'none';
+                }, 5000);
             } else {
                 accPointColors.push('#3b82f6');
                 gyroPointColors.push('#10b981');
@@ -654,21 +1070,31 @@ void handleRoot() {
                 gyroPointRadii.push(0);
             }
             
+            // Update all charts
             accChart.data.datasets[0].pointBackgroundColor = accPointColors;
             accChart.data.datasets[0].pointBorderColor = accPointColors;
             accChart.data.datasets[0].pointRadius = accPointRadii;
+            accChart.data.datasets[1].data = Array(accData.length).fill(accThresholdValue);
+            accChart.update('none');
             
             gyroChart.data.datasets[0].pointBackgroundColor = gyroPointColors;
             gyroChart.data.datasets[0].pointBorderColor = gyroPointColors;
             gyroChart.data.datasets[0].pointRadius = gyroPointRadii;
+            gyroChart.data.datasets[1].data = Array(gyroData.length).fill(gyroThresholdValue);
+            gyroChart.update('none');
             
-            accChart.update();
-            gyroChart.update();
+            combinedChart.data.datasets[0].pointBackgroundColor = accPointColors;
+            combinedChart.data.datasets[0].pointBorderColor = accPointColors;
+            combinedChart.data.datasets[0].pointRadius = accPointRadii;
+            combinedChart.data.datasets[1].pointBackgroundColor = gyroPointColors;
+            combinedChart.data.datasets[1].pointBorderColor = gyroPointColors;
+            combinedChart.data.datasets[1].pointRadius = gyroPointRadii;
+            combinedChart.update('none');
         }
 
         // Handle crash event
         function handleCrashEvent(data) {
-            document.getElementById('crashCount').textContent = data.count;
+            document.getElementById('metricCrashCount').textContent = data.count;
             crashHistory.push(data);
             refreshCrashHistory();
         }
@@ -712,34 +1138,55 @@ void handleRoot() {
             document.getElementById('accThreshold').value = data.acc;
             document.getElementById('gyroThreshold').value = data.gyro;
             document.getElementById('impactTime').value = data.impact;
-            document.getElementById('currentAccThreshold').textContent = data.acc.toFixed(2);
-            document.getElementById('currentGyroThreshold').textContent = data.gyro.toFixed(1);
+            
+            accThresholdValue = data.acc;
+            gyroThresholdValue = data.gyro;
+            
+            document.getElementById('metricThreshold').textContent = 
+                data.acc.toFixed(2) + 'g / ' + data.gyro.toFixed(0) + '°/s';
+            
+            // Update threshold lines in charts
+            if (accChart) {
+                accChart.data.datasets[1].data = Array(maxDataPoints).fill(data.acc);
+                accChart.update('none');
+            }
+            if (gyroChart) {
+                gyroChart.data.datasets[1].data = Array(maxDataPoints).fill(data.gyro);
+                gyroChart.update('none');
+            }
         }
 
-        // Refresh crash history with Dhaka time
+        // Refresh crash history with table format
         function refreshCrashHistory() {
             fetch('/getCrashHistory')
             .then(response => response.json())
             .then(data => {
-                const crashList = document.getElementById('crashList');
+                const tbody = document.getElementById('crashTableBody');
                 if (data.crashes && data.crashes.length > 0) {
-                    crashList.innerHTML = '';
-                    data.crashes.forEach(crash => {
-                        const crashDiv = document.createElement('div');
-                        crashDiv.className = 'crash-item';
-                        crashDiv.innerHTML = `
-                            <div class="crash-time">🚨 CRASH DETECTED</div>
-                            <div class="crash-data">
-                                <div><strong>Time (Dhaka):</strong> ${crash.time}</div>
-                                <div><strong>Acceleration:</strong> ${crash.acc.toFixed(2)} g</div>
-                                <div><strong>Gyroscope:</strong> ${crash.gyro.toFixed(2)} °/s</div>
-                            </div>
+                    tbody.innerHTML = '';
+                    
+                    // Sort crashes by timestamp (most recent first)
+                    data.crashes.sort((a, b) => b.timestamp - a.timestamp);
+                    
+                    data.crashes.forEach((crash, index) => {
+                        const severity = calculateSeverity(crash.acc, crash.gyro);
+                        const severityClass = 'severity-' + severity.toLowerCase();
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><strong>#${crashIdCounter - index}</strong></td>
+                            <td>${crash.time}</td>
+                            <td><strong>${crash.acc.toFixed(2)} g</strong></td>
+                            <td><strong>${crash.gyro.toFixed(2)} °/s</strong></td>
+                            <td><span class="severity-badge ${severityClass}">${severity}</span></td>
                         `;
-                        crashList.appendChild(crashDiv);
+                        tbody.appendChild(row);
                     });
-                    document.getElementById('crashCount').textContent = data.crashes.length;
+                    
+                    crashIdCounter = data.crashes.length + 1;
+                    document.getElementById('metricCrashCount').textContent = data.crashes.length;
                 } else {
-                    crashList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No crashes detected yet</p>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px;">No crashes detected yet</td></tr>';
                 }
             });
         }
@@ -757,9 +1204,9 @@ void handleRoot() {
                 .then(data => {
                     alert('All data cleared!');
                     crashHistory = [];
+                    crashIdCounter = 1;
                     refreshCrashHistory();
-                    document.getElementById('crashCount').textContent = '0';
-                    document.getElementById('dataPoints').textContent = '0';
+                    document.getElementById('metricCrashCount').textContent = '0';
                 });
             }
         }
@@ -774,11 +1221,6 @@ void handleRoot() {
             
             // Update current time every second
             setInterval(updateCurrentTime, 1000);
-            
-            // Update data points counter periodically
-            setInterval(() => {
-                document.getElementById('dataPoints').textContent = accData.length;
-            }, 1000);
         };
     </script>
 </body>
