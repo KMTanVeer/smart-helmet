@@ -182,7 +182,7 @@ void handleRoot() {
         }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             padding: 20px;
             min-height: 100vh;
         }
@@ -191,16 +191,17 @@ void handleRoot() {
             margin: 0 auto;
         }
         .header {
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            background: linear-gradient(135deg, rgba(30,30,50,0.95) 0%, rgba(25,25,45,0.9) 100%);
             padding: 30px;
             border-radius: 20px;
             margin-bottom: 25px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
             text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         h1 {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -209,7 +210,7 @@ void handleRoot() {
             margin-bottom: 8px;
         }
         .subtitle {
-            color: #64748b;
+            color: #a0aec0;
             font-size: 14px;
             font-weight: 500;
         }
@@ -226,7 +227,7 @@ void handleRoot() {
         }
         .current-time {
             font-size: 16px;
-            color: #475569;
+            color: #cbd5e0;
             margin-top: 12px;
             font-weight: 600;
         }
@@ -256,21 +257,22 @@ void handleRoot() {
             margin-bottom: 25px;
         }
         .metric-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            background: linear-gradient(135deg, rgba(30,30,50,0.95) 0%, rgba(25,25,45,0.9) 100%);
             padding: 24px;
             border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
             transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .metric-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.7);
         }
         .metric-label {
             font-size: 13px;
             font-weight: 600;
-            color: #64748b;
+            color: #a0aec0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 8px;
@@ -291,7 +293,7 @@ void handleRoot() {
         }
         .metric-unit {
             font-size: 14px;
-            color: #94a3b8;
+            color: #718096;
             font-weight: 600;
         }
         .status-indicator {
@@ -315,15 +317,16 @@ void handleRoot() {
             50% { opacity: 0.7; transform: scale(1.1); }
         }
         .card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            background: linear-gradient(135deg, rgba(30,30,50,0.95) 0%, rgba(25,25,45,0.9) 100%);
             padding: 28px;
             border-radius: 20px;
             margin-bottom: 25px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         h2 {
-            color: #1e293b;
+            color: #e2e8f0;
             margin-bottom: 20px;
             font-size: 1.4em;
             font-weight: 700;
@@ -347,26 +350,28 @@ void handleRoot() {
         input, button {
             padding: 12px 18px;
             border-radius: 12px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #4a5568;
             font-size: 14px;
             font-weight: 600;
             transition: all 0.3s;
+            background: rgba(45,45,65,0.8);
+            color: #e2e8f0;
         }
         input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.3);
         }
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
             color: white;
             cursor: pointer;
             border: none;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
         }
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 16px rgba(0, 212, 255, 0.6);
         }
         button:active {
             transform: translateY(0);
@@ -407,7 +412,7 @@ void handleRoot() {
             border-spacing: 0;
         }
         thead {
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
             position: sticky;
             top: 0;
             z-index: 10;
@@ -416,20 +421,20 @@ void handleRoot() {
             padding: 14px;
             text-align: left;
             font-weight: 700;
-            color: #1e293b;
+            color: #e2e8f0;
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            border-bottom: 2px solid #cbd5e1;
+            border-bottom: 2px solid #4a5568;
         }
         td {
             padding: 14px;
-            border-bottom: 1px solid #e2e8f0;
-            color: #475569;
+            border-bottom: 1px solid #4a5568;
+            color: #cbd5e0;
             font-size: 14px;
         }
         tr:hover {
-            background: #f8fafc;
+            background: rgba(45,55,72,0.5);
         }
         .severity-badge {
             padding: 4px 12px;
@@ -482,7 +487,7 @@ void handleRoot() {
                 <div class="metric-unit">g-force</div>
                 <div style="margin-top: 12px;">
                     <span class="status-indicator green" id="accIndicator"></span>
-                    <span style="font-size: 12px; color: #64748b; font-weight: 600;" id="accStatus">Normal</span>
+                    <span style="font-size: 12px; color: #a0aec0; font-weight: 600;" id="accStatus">Normal</span>
                 </div>
             </div>
             <div class="metric-card">
@@ -491,12 +496,12 @@ void handleRoot() {
                 <div class="metric-unit">deg/s</div>
                 <div style="margin-top: 12px;">
                     <span class="status-indicator green" id="gyroIndicator"></span>
-                    <span style="font-size: 12px; color: #64748b; font-weight: 600;" id="gyroStatus">Normal</span>
+                    <span style="font-size: 12px; color: #a0aec0; font-weight: 600;" id="gyroStatus">Normal</span>
                 </div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Crash Detection Threshold</div>
-                <div class="metric-value" style="color: #667eea; font-size: 28px;" id="metricThreshold">2.50g / 120°/s</div>
+                <div class="metric-value" style="color: #00d4ff; font-size: 28px;" id="metricThreshold">2.50g / 120°/s</div>
                 <div class="metric-unit">Configurable limits</div>
             </div>
             <div class="metric-card">
@@ -622,8 +627,8 @@ void handleRoot() {
                     datasets: [{
                         label: 'Resultant G-Force',
                         data: accData,
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        borderColor: '#ff6b6b',
+                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
                         borderWidth: 3,
                         tension: 0.4,
                         pointRadius: accPointRadii,
@@ -634,8 +639,8 @@ void handleRoot() {
                     }, {
                         label: 'Crash Threshold',
                         data: Array(maxDataPoints).fill(accThresholdValue),
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                        borderColor: '#ffd93d',
+                        backgroundColor: 'rgba(255, 217, 61, 0.1)',
                         borderWidth: 2,
                         borderDash: [5, 5],
                         pointRadius: 0,
@@ -650,35 +655,44 @@ void handleRoot() {
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'g',
-                                color: '#000000',
+                                text: 'Acceleration (g)',
+                                color: '#e2e8f0',
                                 font: {
-                                    size: 14,
+                                    size: 16,
                                     weight: 'bold'
                                 }
                             },
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
+                                color: 'rgba(255, 255, 255, 0.1)'
                             },
                             ticks: {
-                                color: '#1e293b',
+                                color: '#cbd5e0',
                                 font: {
-                                    weight: '600'
+                                    weight: '600',
+                                    size: 12
                                 }
                             }
                         },
                         x: {
                             title: {
                                 display: true,
-                                text: 'Time',
-                                color: '#1e293b',
+                                text: 'Time (HH:MM:SS)',
+                                color: '#e2e8f0',
                                 font: {
+                                    size: 16,
                                     weight: 'bold'
                                 }
                             },
                             display: true,
                             grid: {
-                                display: false
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#cbd5e0',
+                                font: {
+                                    weight: '600',
+                                    size: 11
+                                }
                             }
                         }
                     },
@@ -686,8 +700,10 @@ void handleRoot() {
                         legend: {
                             display: true,
                             labels: {
+                                color: '#e2e8f0',
                                 font: {
-                                    weight: '600'
+                                    weight: '600',
+                                    size: 13
                                 }
                             }
                         },
@@ -718,8 +734,8 @@ void handleRoot() {
                     datasets: [{
                         label: 'Angular Velocity Magnitude',
                         data: gyroData,
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                        borderColor: '#4ecdc4',
+                        backgroundColor: 'rgba(78, 205, 196, 0.1)',
                         borderWidth: 3,
                         tension: 0.4,
                         pointRadius: gyroPointRadii,
@@ -730,8 +746,8 @@ void handleRoot() {
                     }, {
                         label: 'Crash Threshold',
                         data: Array(maxDataPoints).fill(gyroThresholdValue),
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                        borderColor: '#ffd93d',
+                        backgroundColor: 'rgba(255, 217, 61, 0.1)',
                         borderWidth: 2,
                         borderDash: [5, 5],
                         pointRadius: 0,
@@ -746,35 +762,44 @@ void handleRoot() {
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: '°/s',
-                                color: '#000000',
+                                text: 'Angular Velocity (°/s)',
+                                color: '#e2e8f0',
                                 font: {
-                                    size: 14,
+                                    size: 16,
                                     weight: 'bold'
                                 }
                             },
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
+                                color: 'rgba(255, 255, 255, 0.1)'
                             },
                             ticks: {
-                                color: '#1e293b',
+                                color: '#cbd5e0',
                                 font: {
-                                    weight: '600'
+                                    weight: '600',
+                                    size: 12
                                 }
                             }
                         },
                         x: {
                             title: {
                                 display: true,
-                                text: 'Time',
-                                color: '#1e293b',
+                                text: 'Time (HH:MM:SS)',
+                                color: '#e2e8f0',
                                 font: {
+                                    size: 16,
                                     weight: 'bold'
                                 }
                             },
                             display: true,
                             grid: {
-                                display: false
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#cbd5e0',
+                                font: {
+                                    weight: '600',
+                                    size: 11
+                                }
                             }
                         }
                     },
@@ -782,8 +807,10 @@ void handleRoot() {
                         legend: {
                             display: true,
                             labels: {
+                                color: '#e2e8f0',
                                 font: {
-                                    weight: '600'
+                                    weight: '600',
+                                    size: 13
                                 }
                             }
                         },
@@ -814,8 +841,8 @@ void handleRoot() {
                     datasets: [{
                         label: 'G-Force',
                         data: accData,
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderColor: '#ff6b6b',
+                        backgroundColor: 'rgba(255, 107, 107, 0.15)',
                         borderWidth: 3,
                         tension: 0.4,
                         pointRadius: accPointRadii,
@@ -826,8 +853,8 @@ void handleRoot() {
                     }, {
                         label: 'Angular Velocity',
                         data: gyroData,
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderColor: '#4ecdc4',
+                        backgroundColor: 'rgba(78, 205, 196, 0.15)',
                         borderWidth: 3,
                         tension: 0.4,
                         pointRadius: gyroPointRadii,
@@ -853,19 +880,20 @@ void handleRoot() {
                             title: {
                                 display: true,
                                 text: 'G-Force (g)',
-                                color: '#3b82f6',
+                                color: '#ff6b6b',
                                 font: {
-                                    size: 14,
+                                    size: 16,
                                     weight: 'bold'
                                 }
                             },
                             grid: {
-                                color: 'rgba(59, 130, 246, 0.1)'
+                                color: 'rgba(255, 107, 107, 0.15)'
                             },
                             ticks: {
-                                color: '#3b82f6',
+                                color: '#ff6b6b',
                                 font: {
-                                    weight: '600'
+                                    weight: '600',
+                                    size: 12
                                 }
                             }
                         },
@@ -877,9 +905,9 @@ void handleRoot() {
                             title: {
                                 display: true,
                                 text: 'Angular Velocity (°/s)',
-                                color: '#10b981',
+                                color: '#4ecdc4',
                                 font: {
-                                    size: 14,
+                                    size: 16,
                                     weight: 'bold'
                                 }
                             },
@@ -887,24 +915,33 @@ void handleRoot() {
                                 drawOnChartArea: false,
                             },
                             ticks: {
-                                color: '#10b981',
+                                color: '#4ecdc4',
                                 font: {
-                                    weight: '600'
+                                    weight: '600',
+                                    size: 12
                                 }
                             }
                         },
                         x: {
                             title: {
                                 display: true,
-                                text: 'Time',
-                                color: '#1e293b',
+                                text: 'Time (HH:MM:SS)',
+                                color: '#e2e8f0',
                                 font: {
+                                    size: 16,
                                     weight: 'bold'
                                 }
                             },
                             display: true,
                             grid: {
-                                display: false
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#cbd5e0',
+                                font: {
+                                    weight: '600',
+                                    size: 11
+                                }
                             }
                         }
                     },
@@ -912,8 +949,10 @@ void handleRoot() {
                         legend: {
                             display: true,
                             labels: {
+                                color: '#e2e8f0',
                                 font: {
-                                    weight: '600'
+                                    weight: '600',
+                                    size: 13
                                 }
                             }
                         },
@@ -1064,8 +1103,8 @@ void handleRoot() {
                     timestamp.style.display = 'none';
                 }, 5000);
             } else {
-                accPointColors.push('#3b82f6');
-                gyroPointColors.push('#10b981');
+                accPointColors.push('#ff6b6b');
+                gyroPointColors.push('#4ecdc4');
                 accPointRadii.push(0);
                 gyroPointRadii.push(0);
             }
