@@ -66,7 +66,7 @@ const int NUM_QUOTES = sizeof(quotes) / sizeof(quotes[0]);
 int currentQuote = 0;
 unsigned long lastQuoteChange = 0;
 unsigned long lastHeartBeat = 0;
-bool heartBig = true;
+bool isHeartBig = true;
 int animationPhase = 0;  // 0 = quote display, 1 = final message
 
 /* ================= HEART BITMAP (8x8 pixels) ================= */
@@ -148,7 +148,7 @@ void loop() {
     
     // Animate heart beat
     if (currentTime - lastHeartBeat >= HEART_ANIMATION_SPEED) {
-      heartBig = !heartBig;
+      isHeartBig = !isHeartBig;
       lastHeartBeat = currentTime;
     }
     
@@ -160,7 +160,7 @@ void loop() {
     
     // Animate heart beat on final message
     if (currentTime - lastHeartBeat >= HEART_ANIMATION_SPEED) {
-      heartBig = !heartBig;
+      isHeartBig = !isHeartBig;
       lastHeartBeat = currentTime;
       displayFinalMessage();
     }
@@ -199,10 +199,10 @@ void displayQuoteWithHearts(int quoteIndex) {
   display.clearDisplay();
   
   // Draw animated hearts in corners
-  drawHeart(5, 5, heartBig);           // Top left
-  drawHeart(SCREEN_WIDTH - 13, 5, !heartBig);    // Top right
-  drawHeart(5, SCREEN_HEIGHT - 13, !heartBig);   // Bottom left
-  drawHeart(SCREEN_WIDTH - 13, SCREEN_HEIGHT - 13, heartBig); // Bottom right
+  drawHeart(5, 5, isHeartBig);           // Top left
+  drawHeart(SCREEN_WIDTH - 13, 5, !isHeartBig);    // Top right
+  drawHeart(5, SCREEN_HEIGHT - 13, !isHeartBig);   // Bottom left
+  drawHeart(SCREEN_WIDTH - 13, SCREEN_HEIGHT - 13, isHeartBig); // Bottom right
   
   // Display quote text in center
   display.setTextSize(1);
@@ -247,14 +247,14 @@ void displayFinalMessage() {
   display.clearDisplay();
   
   // Draw multiple hearts around the screen
-  drawHeart(10, 8, heartBig);
-  drawHeart(SCREEN_WIDTH - 18, 8, !heartBig);
-  drawHeart(10, SCREEN_HEIGHT - 16, !heartBig);
-  drawHeart(SCREEN_WIDTH - 18, SCREEN_HEIGHT - 16, heartBig);
+  drawHeart(10, 8, isHeartBig);
+  drawHeart(SCREEN_WIDTH - 18, 8, !isHeartBig);
+  drawHeart(10, SCREEN_HEIGHT - 16, !isHeartBig);
+  drawHeart(SCREEN_WIDTH - 18, SCREEN_HEIGHT - 16, isHeartBig);
   
   // Additional hearts
-  drawHeart(SCREEN_WIDTH/2 - 4, 2, heartBig);
-  drawHeart(SCREEN_WIDTH/2 - 4, SCREEN_HEIGHT - 10, !heartBig);
+  drawHeart(SCREEN_WIDTH/2 - 4, 2, isHeartBig);
+  drawHeart(SCREEN_WIDTH/2 - 4, SCREEN_HEIGHT - 10, !isHeartBig);
   
   // Display final message
   display.setTextSize(2);
