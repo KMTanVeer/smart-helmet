@@ -2,6 +2,19 @@
 
 An intelligent motorcycle/bike helmet safety system that automatically detects accidents using motion sensors and sends emergency SMS alerts with GPS location to designated contacts.
 
+## 💝 NEW: OLED Love Quotes Display!
+
+**File: `oled-love-quotes-riya.ino`** - 💕 **Romantic OLED Display** with:
+- ❤️ **Animated Hearts** - Pulsing heart icons in all corners
+- 💌 **9 Romantic Quotes** - Beautiful messages that rotate
+- 🎬 **Smooth Animations** - Professional display effects
+- 💝 **Personal Dedication** - "I Love You Riya - from your Tanveer"
+- ⚡ **Simple Setup** - Just ESP32 + 0.94" OLED display
+- 🎁 **Perfect Gift** - Express your love in a unique way!
+
+👉 See **[OLED_LOVE_QUOTES_README.md](OLED_LOVE_QUOTES_README.md)** for complete guide!  
+👉 See **[QUICK_START_LOVE_QUOTES.md](QUICK_START_LOVE_QUOTES.md)** for 5-minute setup!
+
 ## 🎯 Not Sure Which Version to Use?
 
 👉 **[VERSION_SELECTION_GUIDE.md](VERSION_SELECTION_GUIDE.md)** - Complete decision guide to help you choose!
