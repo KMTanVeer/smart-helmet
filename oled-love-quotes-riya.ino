@@ -45,7 +45,6 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 /* ================= TIMING CONFIGURATION ================= */
 #define QUOTE_DISPLAY_TIME 4000   // Time to display each quote (ms)
-#define TRANSITION_TIME 500       // Fade transition time (ms)
 #define HEART_ANIMATION_SPEED 100 // Heart beat animation speed (ms)
 
 /* ================= ROMANTIC QUOTES FOR RIYA ================= */
@@ -158,9 +157,8 @@ void loop() {
     
   } else {
     // Final message phase - keep showing the final message
-    displayFinalMessage();
     
-    // Animate heart beat on final message too
+    // Animate heart beat on final message
     if (currentTime - lastHeartBeat >= HEART_ANIMATION_SPEED) {
       heartBig = !heartBig;
       lastHeartBeat = currentTime;
@@ -241,6 +239,11 @@ void displayQuoteWithHearts(int quoteIndex) {
 }
 
 void showFinalMessage() {
+  Serial.println(F("Displaying final message!"));
+  displayFinalMessage();
+}
+
+void displayFinalMessage() {
   display.clearDisplay();
   
   // Draw multiple hearts around the screen
@@ -250,35 +253,6 @@ void showFinalMessage() {
   drawHeart(SCREEN_WIDTH - 18, SCREEN_HEIGHT - 16, heartBig);
   
   // Additional hearts
-  drawHeart(SCREEN_WIDTH/2 - 4, 2, heartBig);
-  drawHeart(SCREEN_WIDTH/2 - 4, SCREEN_HEIGHT - 10, !heartBig);
-  
-  // Display final message
-  display.setTextSize(2);
-  display.setCursor(10, 20);
-  display.print(F("I Love"));
-  
-  display.setCursor(28, 38);
-  display.print(F("You"));
-  
-  display.setTextSize(1);
-  display.setCursor(10, 54);
-  display.print(F("Riya - Tanveer"));
-  
-  display.display();
-  
-  Serial.println(F("Displaying final message!"));
-}
-
-void displayFinalMessage() {
-  // Just update hearts without redrawing everything
-  display.clearDisplay();
-  
-  // Draw animated hearts
-  drawHeart(10, 8, heartBig);
-  drawHeart(SCREEN_WIDTH - 18, 8, !heartBig);
-  drawHeart(10, SCREEN_HEIGHT - 16, !heartBig);
-  drawHeart(SCREEN_WIDTH - 18, SCREEN_HEIGHT - 16, heartBig);
   drawHeart(SCREEN_WIDTH/2 - 4, 2, heartBig);
   drawHeart(SCREEN_WIDTH/2 - 4, SCREEN_HEIGHT - 10, !heartBig);
   
